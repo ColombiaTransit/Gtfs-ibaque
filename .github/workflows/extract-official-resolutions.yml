@@ -1,0 +1,30 @@
+name: Extract official Ibagué 2026 resolutions
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "scripts/extract_official_resolutions.py"
+      - ".github/workflows/extract-official-resolutions.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Inspect official documents with pdfinfo and pdftotext
+        run: python scripts/extract_official_resolutions.py
+      - name: Upload official source documents and extracts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ibague-official-resolutions-2026
+          path: build/official_resolutions/
+          if-no-files-found: warn
