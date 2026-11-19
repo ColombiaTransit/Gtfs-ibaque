@@ -12,7 +12,7 @@ URL=f"https://raw.githubusercontent.com/omtu-unibague/gtfs-ibague/{REV}/gtfs_iba
 SHA256="7cf772c89dec4ac1a0f97e709c9db519ad8d146caaf2121fe624c149ed29c050"
 
 def meters(a,b):
-    lat1,lon1,lat2,lon2=map(math.radians,[a["stop_lat"],a["stop_lon"],b["stop_lat"],b["stop_lon"]])
+    lat1,lon1,lat2,lon2=map(math.radians,[float(a["stop_lat"]),float(a["stop_lon"]),float(b["stop_lat"]),float(b["stop_lon"])])
     v=math.sin((lat2-lat1)/2)**2+math.cos(lat1)*math.cos(lat2)*math.sin((lon2-lon1)/2)**2
     return round(12742000*math.asin(min(1,math.sqrt(v))),1)
 
