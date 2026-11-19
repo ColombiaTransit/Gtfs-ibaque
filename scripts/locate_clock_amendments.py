@@ -35,6 +35,21 @@ def run():
                 data=resp.read(12000000); result["http_status"]=resp.status;result["content_type"]=resp.headers.get("Content-Type","");result["final_url"]=resp.url
             text=data.decode("utf-8","replace")
             result["length"]=len(text)
+            if k == "legacy_gaceta":
+                exact = {}
+                for key, pat in {
+                    "00197":r"(?<!\\d)0*197(?!\\d)",
+                    "1595":r"(?<!\\d)0*1595(?!\\d)",
+                    "30_april_2024":r"30\\s+de\\s+abril\\s+de\\s+2024",
+                    "27_march_2026":r"27\\s+de\\s+marzo\\s+de\\s+2026",
+                }.items():
+                    found = list(re.finditer(pat, text, re.I))
+                    exact[key] = {"count":len(found),"contexts":[]}
+                    for m in found[:16]:
+                        context = html.unescape(re.sub(r"\\s+"," ",text[max(0,m.start()-400):m.end()+450]))
+                        exact[key]["contexts"].append(context[:930])
+                        print("EXACT", key, context[:850])
+                result["exact_hits"] = exact
             if "application/json" in result["content_type"]:
                 result["json_head"]=text[:3500]
             parser=Link();parser.feed(text)
