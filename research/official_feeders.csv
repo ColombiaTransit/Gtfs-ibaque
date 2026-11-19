@@ -1,0 +1,5 @@
+official_route,official_poster_url,source_observation,upstream_gtfs_status
+"Chucuní","https://transmusical.gov.co/wp-content/uploads/2026/06/alimentador-chucuni-scaled.jpg","Official poster lists individual departures by direction for Monday–Friday and Saturday/Sunday/holidays; these must be modeled as departures rather than a continuous headway.","not_present_as_separate_route"
+"Llanos del Combeima","https://transmusical.gov.co/wp-content/uploads/2026/06/alimentador-llanos-del-combeima-scaled.jpg","Three daily departures listed: 05:30, 12:30, 17:30, Monday–Sunday; directional assignment and poster wording must be checked.","not_present_as_separate_route"
+"San Bernardo","https://transmusical.gov.co/wp-content/uploads/2026/06/alimentador-san-bernardo-scaled.jpg","Different origin-specific departure windows for weekdays versus weekends; not a single route-wide operating window.","not_present_as_separate_route"
+"Los Túneles","https://transmusical.gov.co/wp-content/uploads/2026/06/alimentador-tuneles-SIN-NOTA-scaled.jpg","Different origin/day conditions shown; verify the exact departure interpretation before modeling.","not_present_as_separate_route"
