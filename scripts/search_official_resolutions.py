@@ -1,91 +1,90 @@
 #!/usr/bin/env python3
-"""Targeted searches of the official Alcaldía de Ibagué public normative index.
+"""Search the official municipal Gaceta using its actual multipart HTML form.
 
-Uses exactly the public form fields and endpoint in /portal/js/normatividad.js.
-No bulk crawling. Five small searches, results preserved with source URLs.
+The site publishes a free public search. Fetch form first to preserve cookies and
+hidden fields, then use the same FormData encoding as its JavaScript client.
+Only five targeted terms; never enumerate the entire database.
 """
 import html
+import http.cookiejar
 import json
 import re
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from html.parser import HTMLParser
 from pathlib import Path
 
-ENDPOINT="https://ibague.gov.co/portal/seccion/normatividad/resultado.php"
+ROOT="https://ibague.gov.co/portal/seccion/normatividad/"
+INDEX=ROOT+"index.php"
+ENDPOINT=ROOT+"resultado.php"
 SEARCHES=["004951","00197","000370","frecuencias de despacho","transporte público colectivo"]
 
-class LinkParser(HTMLParser):
+class FormParser(HTMLParser):
     def __init__(self):
         super().__init__()
-        self.links=[]
-        self.href=None
-        self.buffer=[]
+        self.inside=False;self.hidden={};self.fields=[]
     def handle_starttag(self,tag,attrs):
         a=dict(attrs)
-        if tag=="a" and a.get("href"):
-            self.href=a["href"];self.buffer=[]
-    def handle_data(self,data):
-        if self.href is not None:self.buffer.append(data)
+        if tag=="form" and a.get("id")=="nmFormulario": self.inside=True
+        if self.inside and tag in ("input","select"):
+            if a.get("name"):
+                self.fields.append((a["name"],a.get("value","")))
+                if a.get("type")=="hidden":self.hidden[a["name"]]=a.get("value","")
     def handle_endtag(self,tag):
-        if tag=="a" and self.href is not None:
-            self.links.append({"href":self.href,"label":" ".join(" ".join(self.buffer).split())[:180]})
-            self.href=None;self.buffer=[]
+        if tag=="form":self.inside=False
 
-def search(term):
-    fields={
-        "lib":"",
-        "pagina":"1",
-        "palabra":term,
-        "pk_id_clase":"",
-        "fk_id_dependencia":"",
-        "a_documento":"",
-        "fechaini":"",
-        "fechafin":""
-    }
-    req=urllib.request.Request(ENDPOINT,data=urllib.parse.urlencode(fields).encode("utf-8"),headers={
-        "User-Agent":"ColombiaTransit public-document research (https://github.com/ColombiaTransit/Gtfs-ibaque)",
-        "Referer":"https://ibague.gov.co/portal/seccion/normatividad/index.php",
+def post_multipart(opener,form,word):
+    import secrets
+    boundary="----colombiatransit-"+secrets.token_hex(8)
+    values={k:v for k,v in form.fields}
+    values.update({"palabra":word,"pagina":"1"})
+    data=b"".join((f"--{boundary}\r\nContent-Disposition: form-data; name=\"{k}\"\r\n\r\n{v}\r\n").encode("utf8") for k,v in values.items())
+    data+=f"--{boundary}--\r\n".encode()
+    req=urllib.request.Request(ENDPOINT,data=data,method="POST",headers={
+        "User-Agent":"Mozilla/5.0 (compatible; ColombiaTransit OfficialDocumentResearch/1.0)",
+        "Referer":INDEX,
         "Origin":"https://ibague.gov.co",
-        "Accept":"text/html, */*",
-        "Content-Type":"application/x-www-form-urlencoded; charset=UTF-8",
-    },method="POST")
-    with urllib.request.urlopen(req,timeout=35) as r:
-        raw=r.read(500000)
-        status=r.status
-    text=raw.decode("utf-8","replace")
-    parser=LinkParser();parser.feed(text)
-    # Preserve all visible snippets near likely hits, keeping output compact
-    matches=[]
-    regex=re.compile(r"(?i)resoluci[oó]n|frecuencia|despacho|movilidad|transporte|004951|00197|000370")
-    for m in regex.finditer(text):
-        segment=text[max(0,m.start()-160):min(len(text),m.end()+250)]
-        segment=html.unescape(re.sub("<[^>]*>"," ",segment))
-        segment=" ".join(segment.split())[:350]
-        if segment not in matches:matches.append(segment)
-        if len(matches)>=12:break
+        "Accept":"*/*",
+        "Content-Type":f"multipart/form-data; boundary={boundary}",
+    })
+    try:
+        with opener.open(req,timeout=30) as r:
+            content=r.read(600000)
+            return r.status,content.decode("utf-8","replace")
+    except urllib.error.HTTPError as e:
+        return e.code,e.read(20000).decode("utf-8","replace")
+
+def extract(text):
     links=[]
-    for x in parser.links:
-        url=urllib.parse.urljoin(ENDPOINT,x["href"])
-        if url.startswith("https://ibague.gov.co/") or url.startswith("https://www.ibague.gov.co/"):
-            if url not in {z["url"] for z in links}: links.append({"url":url,"label":x["label"]})
-    return {"term":term,"status":status,"bytes":len(raw),"head":text[:280],"links":links[:80],"matched_snippets":matches}
+    for href,label in re.findall(r"<a\s+[^>]*href=[\"']([^\"']+)[\"'][^>]*>(.*?)</a>",text,flags=re.I|re.S):
+        stripped=" ".join(html.unescape(re.sub("<[^>]+>"," ",label)).split())
+        full=urllib.parse.urljoin(ROOT,html.unescape(href))
+        if full not in [x["url"] for x in links]:
+            links.append({"label":stripped[:220],"url":full})
+    plain=" ".join(html.unescape(re.sub("<[^>]+>"," ",text)).split())
+    return links[:60],plain[:1800]
 
 def main():
+    cj=http.cookiejar.CookieJar()
+    opener=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
+    with opener.open(urllib.request.Request(INDEX,headers={"User-Agent":"Mozilla/5.0 (compatible; ColombiaTransit OfficialDocumentResearch/1.0)"}),timeout=30) as r:
+        body=r.read().decode("utf-8","replace")
+    form=FormParser();form.feed(body)
+    print("OFFICIAL_FORM_FIELDS",form.fields)
+    print("COOKIE_COUNT",len(cj))
     results=[]
-    for term in SEARCHES:
-        try:
-            result=search(term)
-        except Exception as e:
-            result={"term":term,"error":str(e)[:500]}
-        results.append(result)
-        print(f"SEARCH {term}: status={result.get('status','error')} bytes={result.get('bytes','-')}")
-        print("HEAD",result.get("head","")[:150])
-        if result.get("error"):print("ERROR",result["error"])
-        for x in result.get("links",[])[:20]:print("LINK",x["label"],x["url"])
-        for x in result.get("matched_snippets",[])[:4]:print("TEXT",x[:300])
-        time.sleep(.7)
+    for word in SEARCHES:
+        status,text=post_multipart(opener,form,word)
+        links,plain=extract(text)
+        d={"search":word,"status":status,"text_prefix":plain,"links":links}
+        results.append(d)
+        print("SEARCH",word,"status",status,"length",len(text),"links",len(links))
+        print("TEXT",plain[:800])
+        for x in links[:20]:
+            print("LINK",x["label"],x["url"])
+        time.sleep(.5)
     Path("build").mkdir(exist_ok=True)
     Path("build/municipal_resolution_search.json").write_text(json.dumps(results,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
 if __name__=="__main__": main()
