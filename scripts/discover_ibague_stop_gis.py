@@ -30,7 +30,7 @@ def inspect():
     for q in SEARCHES:
         rec={"query":q}
         try:
-            data,status=get_json(API,{"f":"json","q":q,"num":"30","start":"1"})
+            data,status=get_json(API,{"f":"json","q":q,"num":("100" if q.startswith("owner:") else "30"),"start":"1"})
             rec["http_status"]=status;rec["total_hits"]=data.get("total"); rec["api_error"]=data.get("error")
             items=[]
             for item in data.get("results",[]):
@@ -42,7 +42,7 @@ def inspect():
                     seen[item["id"]]=d
             rec["relevant_results"]=items
             print("QUERY",q,"total",data.get("total"),"local_relevant",len(items))
-            for d in items[:15]: print("CANDIDATE",d.get("id"),d.get("title"),d.get("type"),"owner",d.get("owner"),"url",d.get("url"))
+            for d in items[:65]: print("CANDIDATE",d.get("id"),d.get("title"),d.get("type"),"owner",d.get("owner"),"url",d.get("url"))
         except Exception as e:
             rec["error"]=repr(e);print("ERROR",q,repr(e))
         reports.append(rec)
