@@ -54,6 +54,7 @@ The GTFS currently lacks all Saturday, Sunday and holiday calendars, and 16 rout
 The provisional 2022 clock profile is recorded with citations, day-type scope, conflicts and route-28 / pre-06:00 exceptions:
 
 - [Clock-block research and legal continuity](research/clock_blocks_audit.md)
+- [Final PDF review — which amendments were and were not directly verified](research/clock_amendment_final_review.md)
 - [Machine-readable provisional clock blocks](research/clock_blocks_2022.csv)
 
 The original 2022 regulation was reproduced by a news source and its unmodified provisions are expressly carried forward by article 4 of the original 004951/2026 scanned municipality PDF. However, the intervening 2024 and March 2026 changes have not been fully inspected. **No assumption is silently promoted to a final GTFS service rule.**

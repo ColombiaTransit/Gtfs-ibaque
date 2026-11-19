@@ -1,5 +1,7 @@
 # Ibagué clock-block research (HP / HV / NOC) — 19 November 2026
 
+**Final PDF follow-up:** [review of the 2024 and 2026 amendment evidence](clock_amendment_final_review.md). The two target original PDFs were not found; official 004951/2026 and 005549/2026 were both re-inspected. The 2022 clock scheme remains a documented provisional working assumption, **not legally certified for 2026**.
+
 ## Finding: historical definition exists, but current applicability still requires an amendment audit
 
 The text of **Resolución 000370 of 2 May 2022** is reproduced in [CambioIn — Los cambios profundos que tendrá el transporte urbano en Ibagué](https://www.cambioin.com/principal/los-cambios-profundos-que-tendra-el-transporte-urbano-en-ibague). In its paragraph on frequency categories, it specifies these operating periods:
