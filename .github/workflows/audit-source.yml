@@ -5,7 +5,9 @@ on:
   push:
     paths:
       - "scripts/audit_source.py"
+      - "scripts/compare_official_hours.py"
       - "sources/upstream.json"
+      - "research/official_service_hours.csv"
       - ".github/workflows/audit-source.yml"
 
 permissions:
@@ -19,11 +21,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Download source and audit references
+      - name: Audit original GTFS
         run: python scripts/audit_source.py --download --output build/audit.json
-      - name: Upload audit report
+      - name: Compare with official TransMusical route hours
+        run: python scripts/compare_official_hours.py --download --output build/official_hours_comparison.json
+      - name: Upload audit reports
         uses: actions/upload-artifact@v4
         with:
           name: gtfs-ibague-source-audit
-          path: build/audit.json
+          path: build/*.json
           if-no-files-found: error

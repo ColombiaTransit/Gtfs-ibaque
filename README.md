@@ -9,7 +9,7 @@ Reproducible research and GTFS preparation for public transport in **Ibagué, To
 The upstream feed published by the Observatorio de Movilidad y Transporte at Universidad de Ibagué is the starting point. Its original archive remains unchanged. A pinned upstream revision and SHA-256 checksum are recorded in [`sources/upstream.json`](sources/upstream.json).
 
 **Source:** [omtu-unibague/gtfs-ibague](https://github.com/omtu-unibague/gtfs-ibague)  
-**Transport authority / route information:** [SETP TransMusical](https://transmusical.gov.co/rutas/)
+**Official route posters:** [SETP TransMusical](https://transmusical.gov.co/rutas/)
 
 ## Upstream feed inventory (22 May 2026 snapshot)
 
@@ -25,34 +25,44 @@ The upstream feed published by the Observatorio de Movilidad y Transporte at Uni
 | Trips without frequencies | 32 across 16 routes |
 | Default service calendar | Monday–Friday only |
 
-The upstream feed declares service dates 2024-01-01 through 2030-12-31, but this **does not demonstrate that its service patterns are current**.
+Declared service dates are 2024-01-01 through 2030-12-31. They do **not** demonstrate that the source remains operationally current.
 
-## Research registers
+## Official operating-hours audit (19 November 2026)
 
-- [Route inventory and change flags](research/routes.csv): route-by-route audit status.
-- [Frequency candidates](research/frequency_candidates.csv): *unverified planning leads*, not approved GTFS headways.
-- [Source findings and open questions](research/findings.md): official changes, route 39, service-day limitations and required checks.
+All **36** route posters from [TransMusical's official list](https://transmusical.gov.co/rutas/) were inspected: **32 regular route posters**, plus **4 feeder services** with different direction-specific or individual departure patterns.
 
-## Reproduce the source audit
+- [Official regular route service hours, with direct links to every image](research/official_service_hours.csv).
+- [Special feeder service posters](research/official_feeders.csv).
+- [Analysis, limitations and currently identified discrepancies](research/official_hours_audit.md).
+- [Route coverage and modifications](research/routes.csv).
+- [Frequency candidates — secondary, NOT official](research/frequency_candidates.csv).
+- [Other research findings](research/findings.md).
 
-Python 3.11+ with **standard library only**:
+The GTFS currently lacks all Saturday, Sunday and holiday calendars, and 16 routes have no `frequencies.txt` entries. Route 39 and separately advertised route 4 are not standalone entries in the source; source route 4/7 corresponds at least in part to the later posted route 7. The official route posters contain **service spans, not complete headways**.
+
+## Reproduce audits
+
+Python 3.11+ using standard library only:
 
 ```sh
 python scripts/audit_source.py --zip gtfs_ibague.zip --output build/audit.json
-# Or download the pinned upstream copy:
-python scripts/audit_source.py --download --output build/audit.json
+python scripts/compare_official_hours.py --zip gtfs_ibague.zip --output build/official_hours_comparison.json
+# Or fetch the SHA-256-verified pinned upstream copy directly:
+python scripts/audit_source.py --download
+python scripts/compare_official_hours.py --download
 ```
 
-Run the **Audit pinned upstream GTFS** GitHub Actions workflow to download the pinned ZIP, verify SHA-256, and publish an audit JSON artifact.
+The **Audit pinned upstream GTFS** GitHub Actions workflow runs both checks and uploads JSON reports.
 
 ## Data integrity policy
 
-1. Preserve the original upstream ZIP byte-for-byte and attribute Universidad de Ibagué / SETP. Do not silently rewrite the source.
-2. Record all changes separately with source URLs, effective dates, and verification status.
-3. Do not convert frequency ranges into exact GTFS `headway_secs` without a documented assumption and a distinct status flag.
-4. Do not infer weekend or holiday service merely from an advertised timetable when it cannot be mapped to each trip pattern.
-5. Validate route geometry affected by changes effective **19 October 2026** before publication.
-6. Add Colombian public holidays and the MobilityData GTFS Validator during the feed-generation phase.
-7. Confirm reuse rights before redistributing the upstream archive or publishing a derived feed; the upstream repository currently does not specify a license.
+1. Preserve the upstream archive unchanged and attribute Universidad de Ibagué / SETP; do not silently rewrite it.
+2. Record modifications with source URLs, effective dates and verification status.
+3. Do not convert third-party headway ranges into exact GTFS headways without a documented assumption and status flag.
+4. An official route-wide service window is not necessarily the first/last departure in every direction. Differences are research flags, not direct instructions to rewrite the GTFS.
+5. Verify route shapes affected by the **19 October 2026** change before release.
+6. Confirm timetable and branch conditions for four advertised feeder services, routes 4, 7 and 39.
+7. Add Colombian public holiday calendars and run the MobilityData GTFS Validator before feed publication.
+8. Confirm redistribution permission first: the source repository has no explicit license.
 
-This repository intentionally does **not** claim that the missing frequencies or modified shapes have been fixed.
+No revised GTFS feed has been generated or published yet.
