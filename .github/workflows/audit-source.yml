@@ -1,0 +1,29 @@
+name: Audit pinned upstream GTFS
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "scripts/audit_source.py"
+      - "sources/upstream.json"
+      - ".github/workflows/audit-source.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download source and audit references
+        run: python scripts/audit_source.py --download --output build/audit.json
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gtfs-ibague-source-audit
+          path: build/audit.json
+          if-no-files-found: error

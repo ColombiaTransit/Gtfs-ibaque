@@ -1,0 +1,22 @@
+{
+  "source_repository": "https://github.com/omtu-unibague/gtfs-ibague",
+  "source_commit": "55be037eaeaa7031eb095af53929e4ef2caaba9a",
+  "source_archive": "https://raw.githubusercontent.com/omtu-unibague/gtfs-ibague/55be037eaeaa7031eb095af53929e4ef2caaba9a/gtfs_ibague.zip",
+  "source_archive_sha256": "7cf772c89dec4ac1a0f97e709c9db519ad8d146caaf2121fe624c149ed29c050",
+  "upstream_feed_version": "v1.0_20260522",
+  "feed_declared_start": "20240101",
+  "feed_declared_end": "20301231",
+  "metadata_note": "The upstream GitHub repository advertises no license; confirm redistribution rights before publishing a derived ZIP.",
+  "audit_date": "2026-11-19",
+  "initial_inventory": {
+    "routes": 30,
+    "trips": 62,
+    "stops": 1153,
+    "stop_times": 3925,
+    "shapes": 62,
+    "shape_points": 16115,
+    "frequencies": 30,
+    "missing_frequency_trips": 32,
+    "missing_frequency_routes": 16
+  }
+}
