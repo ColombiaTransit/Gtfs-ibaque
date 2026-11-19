@@ -1,28 +1,35 @@
-# Original-frequency source investigation — 19 November 2026
+# Official frequency investigation — Ibagué
 
-## Restriction
+**Status as of 19 November 2026: all 30 route frequencies found in the official 2026 act. Moovit is excluded.**
 
-Do **not** use Moovit or its derivatives to justify frequency or calendar edits. The existing `research/frequency_candidates.csv` is a legacy secondary research file and is not used by the official-frequency investigation or generator.
+## Governing source
 
-## Primary decisions to find
+[Resolución 005549 — Secretaría de Movilidad de Ibagué, 9 October 2026](https://ibague.gov.co/portal/admin/archivos/normatividad/2026/69845-RES-20261009145629.pdf), **article 3, scanned pages 9–13**, directly supplies all route headways.
 
-1. **Resolución 000370 (2 May 2022)** — original document referenced by university study. The study presents route-specific frequency targets and distinguishes them from field-observed actual headways.
-2. **Resolución 00197 (30 April 2024)** — issued by Secretaría de Movilidad to regulate frequency, service hours and the authorized vehicle fleet. Reported in [2024 press coverage quoting SETP](https://www.elnuevodia.com.co/ibague/518492-atencion-estos-son-los-cambios-que-tendran-las-rutas-de-busetas-en-ibague). Original PDF and frequency annex **not yet secured**.
-3. **Alleged Resolución 004951 (2026)** — named by a *non-governmental* app (Mi Ruta). This number and document **not independently verified**; treat only as an archival search term, not legal authority.
-4. 19 October 2026 changes: [official Ibagué municipality release](https://www.ibague.gov.co/portal/noticias/23334-este-lunes-cambiaran-los-recorridos-de-14-rutas-de-busetas-en-ibague-conozca-sus) is primary for routing changes. It **does not state exact headways**.
+- Repeals Resolución **005459** (6 October 2026).
+- Partially modifies Resolución **004951** (15 September 2026), principally its **articles 1 and 3**.
+- The earlier 004951 PDF is [available at the municipality archive](https://ibague.gov.co/portal/admin/archivos/normatividad/2026/70041-RES-20261113170945.pdf); its formerly published table is **not** the controlling table after article 3 was replaced by 005549.
+- Official original PDFs and OCR text were downloaded by [GitHub Actions run 44600046626](https://github.com/ColombiaTransit/Gtfs-ibaque/actions/runs/44600046626). The scanned tables were **visually re-read** (OCR alone is unreliable).
 
-## Historical official norms quoted by Universidad de Ibagué
+**Canonical data:** [`official_resolution_005549_frequencies.csv`](official_resolution_005549_frequencies.csv).  
+**Detailed data interpretation / caveats:** [`official_frequency_2026.md`](official_frequency_2026.md).
 
-The university thesis [Análisis de la eficiencia del transporte público colectivo](https://repositorio.unibague.edu.co/bitstreams/f24b40e5-97a5-4a39-99f4-65b95f08fe63/download) cites Resolución 000370/2022 for route headway *standards*. Eight missing-frequency routes are covered: **22:5; 23:5; 24:5; 31:6; 37:5; 40:3; 48:8; 82:3 minutes**. See [`historical_official_frequency_standards.csv`](historical_official_frequency_standards.csv).
+## Coverage
 
-The **original act has not been located** and the thesis's PDF page image could not be retrieved from the web inspection environment (403), although indexed text was accessible. These values remain *secondary transcriptions of historical regulations*, not verified 2026 published dispatch frequencies. Do not write them to `frequencies.txt` automatically.
+- **30/30 upstream routes:** authoritative October 2026 frequency standards per peak, off-peak and nocturnal period on weekdays and Saturdays, plus each Sunday/holiday headway.
+- **16/16 routes with missing entries in the upstream ZIP now have official candidate headways** (22, 23, 24, 28, 29, 31, 33, 35, 37, 40, 43, 48, 50, 53, 82, 90).
+- These values are safe to register as source transcription. They are **not yet applied to GTFS**, as the actual clock boundaries for HP/HV/NOC still need primary-source verification, along with assignment to all directions and GTFS variants.
+- Route 29's `FREC NOC = 0` means no night departures, not a zero-minute headway.
 
-## Specific historical feeder figure
+## Prior acts / remaining research
 
-Press reproducing the 2024 municipal SETP announcement reports a **30-minute** service for the **Buenos Aires / Parque Caiké feeder**, Saturdays, Sundays and Colombian holidays, **08:00–18:30**. This is a historic 2024 measure and **not** proof that the same feeder pattern remains operating in 2026: [2024 El Nuevo Día report](https://www.elnuevodia.com.co/ibague/518492-atencion-estos-son-los-cambios-que-tendran-las-rutas-de-busetas-en-ibague).
+- **Resolución 000370 (2 May 2022):** a [university study](https://repositorio.unibague.edu.co/bitstreams/f24b40e5-97a5-4a39-99f4-65b95f08fe63/download) cites earlier standards for 8 routes; superseded for our registry by the October 2026 headway table. See [historical references](historical_official_frequency_standards.csv).
+- **Resolución 00197 (30 April 2024):** formally reported in [contemporary coverage](https://www.ecosdelcombeima.com/ibague/nota-17707-atencion-conozca-los-cambios-en-las-rutas-de-buses-en-ibague), but the original PDF/annex is not retrieved.
+- The 2026 Act 004951 (page 16, article 4) explicitly references 000370/2022, 000898/2022, 00152/2024, 00197/2024, and 1595/27 March 2026 as continuing unless contradicted. This is a clue for locating period boundary definitions, not authorization to copy older headways over a later table.
+- A 2022 resolution [republished by CambioIn](https://www.cambioin.com/principal/los-cambios-profundos-que-tendra-el-transporte-urbano-en-ibague) gives provisional HP/HV/NOC clock blocks, but it is a secondary transcription, has inconsistent printed afternoon valley text, and has not been confirmed against a primary applicable 2026 act. See [caveats](official_frequency_2026.md).
+- Four feeder posters, official route 39, and separately shown route 4 require independent inclusion/authorization checks.
+- Site service-hours conflicts are recorded separately from headways; don't silently overwrite the official October 2026 table with older route posters.
 
-## Gaps as of 19 November 2026
+## Source rule
 
-No directly inspected current official route headway tables for routes **22,23,24,28,29,31,33,35,37,40,43,48,50,53,82,90**. Historical citations cover eight of them. No exact official source obtained for **28,29,33,35,43,50,53,90**.
-
-Best next actions are searching the [municipal normativity index](https://ibague.gov.co/portal/seccion/normatividad/index.php) directly, finding original act attachments, and requesting the relevant frequency annex from the Secretaría de Movilidad or SETP. Avoid converting historic standard into operational current headway without checking dates and amendments.
+Moovit has no role in the present frequency research. The legacy `frequency_candidates.csv` file is **deprecated secondary-source material** and must not be consumed by the generator. Use only the direct 2026 legal table and verified official service-day sources.

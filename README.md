@@ -27,6 +27,15 @@ The upstream feed published by the Observatorio de Movilidad y Transporte at Uni
 
 Declared service dates are 2024-01-01 through 2030-12-31. They do **not** demonstrate that the source remains operationally current.
 
+## Official 2026 legal headway table
+
+The primary frequency source is **Resolución 005549 (9 October 2026), article 3, pages 9–13**. All 30 routes are manually transcribed into [`research/official_resolution_005549_frequencies.csv`](research/official_resolution_005549_frequencies.csv): weekdays and Saturdays each have peak/valley/night headways, while Sundays/holidays have one headway.
+
+- [Full legal-source frequency analysis](research/official_frequency_2026.md)
+- [2026 source discovery, legal supersession and outstanding period boundaries](research/official_frequency_investigation.md)
+
+**16/16 originally missing frequency routes now have official legal headways.** The GTFS source ZIP has **not** yet been modified; exact hours for HP/HV/NOC, service-day and trip-direction mapping, updated shapes and validator remain pending. Third-party Moovit frequency estimates are excluded.
+
 ## Official operating-hours audit (19 November 2026)
 
 All **36** route posters from [TransMusical's official list](https://transmusical.gov.co/rutas/) were inspected: **32 regular route posters**, plus **4 feeder services** with different direction-specific or individual departure patterns.
@@ -38,7 +47,7 @@ All **36** route posters from [TransMusical's official list](https://transmusica
 - [Frequency candidates — secondary, NOT official](research/frequency_candidates.csv).
 - [Other research findings](research/findings.md).
 
-The GTFS currently lacks all Saturday, Sunday and holiday calendars, and 16 routes have no `frequencies.txt` entries. Route 39 and separately advertised route 4 are not standalone entries in the source; source route 4/7 corresponds at least in part to the later posted route 7. The official route posters contain **service spans, not complete headways**.
+The GTFS currently lacks all Saturday, Sunday and holiday calendars, and 16 routes have no `frequencies.txt` entries. Route 39 and separately advertised route 4 are not standalone entries in the source; source route 4/7 corresponds at least in part to the later posted route 7. The official route posters contain **service spans, not complete headways**; the exact headways are instead transcribed from the legally published October 2026 tables.
 
 ## Reproduce audits
 
