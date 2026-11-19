@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - "scripts/audit_source.py"
+      - "scripts/audit_stop_identifiers.py"
       - "scripts/compare_official_hours.py"
       - "sources/upstream.json"
       - "research/official_service_hours.csv"
@@ -29,6 +30,8 @@ jobs:
         run: python scripts/compare_official_hours.py --download --output build/official_hours_comparison.json
       - name: Validate official 2026 frequency register and document conflicts
         run: python scripts/validate_official_frequencies.py --output build/official_frequencies_validation.json
+      - name: Audit existing stop codes and unnamed stops
+        run: python scripts/audit_stop_identifiers.py --download --output build/stop_identifiers_audit.json
       - name: Upload audit reports
         uses: actions/upload-artifact@v4
         with:

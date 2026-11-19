@@ -59,6 +59,15 @@ The provisional 2022 clock profile is recorded with citations, day-type scope, c
 
 The original 2022 regulation was reproduced by a news source and its unmodified provisions are expressly carried forward by article 4 of the original 004951/2026 scanned municipality PDF. However, the intervening 2024 and March 2026 changes have not been fully inspected. **No assumption is silently promoted to a final GTFS service rule.**
 
+## Stop inventory (1,153 existing GTFS stops)
+
+We found **974 numbered stop records (973 distinct candidate paradero IDs)**, **101 synthetic terminal stops**, and **78 unnamed placeholders** in the original source. Number `287` appears at two physically distant points.
+
+- [Official stop signs, ArcGIS catalog audit and GTFS stop-quality findings](research/stop_sources_audit.md)
+- [Reproducible source stop-ID audit](scripts/audit_stop_identifiers.py)
+
+Keep existing `stop_id` and `stop_times.txt` references intact; verify before introducing human-readable names or mapping official sign codes.
+
 ## Reproduce audits
 
 Python 3.11+ using standard library only:
