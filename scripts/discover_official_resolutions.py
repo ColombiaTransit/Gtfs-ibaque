@@ -17,7 +17,7 @@ URLS = [
     "https://transmusical.gov.co/normatividad/",
 ]
 KEYWORDS = ("normativ", "resoluc", "document", "busqueda", "search", "buscar", "api", "ajax", "datatable")
-PAT = re.compile(r"(?i)normativ|resoluci|documentos|buscar|busqueda|search|endpoint|api/|\\.ajax|fetch\\(")
+PAT = re.compile(r"normativ|resoluci|documentos|buscar|busqueda|search|endpoint|api/|ajax|fetch", re.I)
 
 class Links(HTMLParser):
     def __init__(self):
