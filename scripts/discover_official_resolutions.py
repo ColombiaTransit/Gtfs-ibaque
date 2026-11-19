@@ -72,6 +72,8 @@ def main():
             if "text" in fetched:
                 matches=snippets(fetched["text"],PAT,max_count=8)
                 script.update({"bytes":len(fetched["text"]),"matches":matches})
+                if absolute.endswith("/js/normatividad.js"):
+                    print("BEGIN_OFFICIAL_NORM_JS\n"+fetched["text"][:22000]+"\nEND_OFFICIAL_NORM_JS")
             else:
                 script["error"]=fetched["error"]
             if script.get("matches") or any(k in absolute.lower() for k in KEYWORDS):
