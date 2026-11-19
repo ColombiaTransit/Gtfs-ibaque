@@ -49,6 +49,15 @@ All **36** route posters from [TransMusical's official list](https://transmusica
 
 The GTFS currently lacks all Saturday, Sunday and holiday calendars, and 16 routes have no `frequencies.txt` entries. Route 39 and separately advertised route 4 are not standalone entries in the source; source route 4/7 corresponds at least in part to the later posted route 7. The official route posters contain **service spans, not complete headways**; the exact headways are instead transcribed from the legally published October 2026 tables.
 
+## Clock periods (HP / HV / NOC)
+
+The provisional 2022 clock profile is recorded with citations, day-type scope, conflicts and route-28 / pre-06:00 exceptions:
+
+- [Clock-block research and legal continuity](research/clock_blocks_audit.md)
+- [Machine-readable provisional clock blocks](research/clock_blocks_2022.csv)
+
+The original 2022 regulation was reproduced by a news source and its unmodified provisions are expressly carried forward by article 4 of the original 004951/2026 scanned municipality PDF. However, the intervening 2024 and March 2026 changes have not been fully inspected. **No assumption is silently promoted to a final GTFS service rule.**
+
 ## Reproduce audits
 
 Python 3.11+ using standard library only:

@@ -1,0 +1,10 @@
+scope,route,start_time,end_time,period,source_type,verification_status,remarks
+ordinary_and_saturday_provisional,*,04:40,06:00,NOC,2022_republished_resolution,needs_primary_amendment_check,"2022 act permits HP HV or NOC headways depending on demand during this period; NOC is only the default label"
+ordinary_and_saturday_provisional,*,06:00,08:30,HP,2022_republished_resolution,needs_primary_amendment_check,"Morning peak"
+ordinary_and_saturday_provisional,*,08:30,11:30,HV,2022_republished_resolution,needs_primary_amendment_check,"Morning valley"
+ordinary_and_saturday_provisional,*,11:30,14:30,HP,2022_republished_resolution,needs_primary_amendment_check,"Midday peak"
+ordinary_and_saturday_provisional,*,14:30,17:00,HV,2022_republished_resolution,conflicting_2022_text,"One line says 15:00; schedule graphic says 17:00; choose 17:00 only as a provisional transcription"
+ordinary_and_saturday_provisional,*,17:00,19:30,HP,2022_republished_resolution,needs_primary_amendment_check,"Evening peak; exception for route 28"
+ordinary_and_saturday_provisional,*,19:30,22:00,NOC,2022_republished_resolution,needs_primary_amendment_check,"Night headway; truncate to each route official service window"
+route_specific_historical_exception,28,16:00,18:00,HP,2022_republished_resolution,needs_primary_amendment_check,"Explicit historic afternoon peak override. Follow-on 18:00–19:30 period is not explicitly defined for route 28, do not guess"
+sunday_and_holidays,*,route_start,route_end,FLAT,2026_official_regulation,official_table_confirmed,"Single official Sunday/holiday headway per route; no HP/HV/NOC segmentation"
