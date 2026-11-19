@@ -1,0 +1,28 @@
+name: Prepare GTFS stop remediation review
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "scripts/prepare_stop_remediation.py"
+      - ".github/workflows/stop-remediation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  stop-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify pinned GTFS and build route-aware stop review
+        run: python scripts/prepare_stop_remediation.py --download --output-dir build/stop_review
+      - name: Upload review evidence (no stop edits)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ibague-stop-remediation-review
+          path: build/stop_review/*
+          if-no-files-found: error
