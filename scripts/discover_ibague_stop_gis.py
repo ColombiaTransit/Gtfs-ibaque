@@ -15,6 +15,9 @@ SEARCHES=[
  "transporte público AND Ibagué",
  "unibague AND movilidad",
  "omtu AND Ibagué",
+ "owner:omtu_unibague",
+ "owner:2220181026_unibague",
+ "title:Paraderos",
 ]
 CHECK_TERMS=re.compile("ibagu[eé]|tolima|universidad de ibagu[eé]|transmusical|omtu",re.I)
 def get_json(url,params=None):
