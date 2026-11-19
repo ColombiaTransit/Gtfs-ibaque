@@ -19,7 +19,7 @@ from pathlib import Path
 ROOT="https://ibague.gov.co/portal/seccion/normatividad/"
 INDEX=ROOT+"index.php"
 ENDPOINT=ROOT+"resultado.php"
-SEARCHES=[("197","2024"),("370","2022"),("005459","2026"),("5459","2026"),("frecuencias","2024"),("frecuencias","2026")]
+SEARCHES=[("1595","2026"),("001595","2026"),("27 de marzo","2026"),("rodamiento","2026"),("00197","2024"),("197","2024"),("30 de abril","2024"),("horas pico","2024"),("horas valle","2026")]
 
 class FormParser(HTMLParser):
     def __init__(self):
