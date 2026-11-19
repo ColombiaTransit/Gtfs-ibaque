@@ -30,3 +30,8 @@ route_label,upstream_route_id,pattern_count,upstream_frequency_rows,geometry_cha
 9,29,2,2,yes,source_present,"Official itinerary modification announced 2026-10-19"
 90,30,2,0,no,frequency_missing,""
 39,,0,0,no,not_in_upstream,"Listed on official TransMusical route page; requires service evidence and geometry"
+4,,0,0,no,official_route_missing_in_upstream,"Separate official route 4 poster published in addition to route 7; existing RUTA 4/7 requires reconciliation"
+Chucuní,,0,0,no,official_feeder_missing_in_upstream,"Alimentador with individual directional departures on official site"
+Llanos del Combeima,,0,0,no,official_feeder_missing_in_upstream,"Alimentador with three daily advertised departures on official site"
+San Bernardo,,0,0,no,official_feeder_missing_in_upstream,"Alimentador with day-specific directional service windows on official site"
+Los Túneles,,0,0,no,official_feeder_missing_in_upstream,"Alimentador with origin- and day-specific service windows on official site"
