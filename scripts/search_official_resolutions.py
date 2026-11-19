@@ -19,7 +19,7 @@ from pathlib import Path
 ROOT="https://ibague.gov.co/portal/seccion/normatividad/"
 INDEX=ROOT+"index.php"
 ENDPOINT=ROOT+"resultado.php"
-SEARCHES=["004951","00197","000370","frecuencias de despacho","transporte público colectivo"]
+SEARCHES=[("197","2024"),("370","2022"),("005459","2026"),("5459","2026"),("frecuencias","2024"),("frecuencias","2026")]
 
 class FormParser(HTMLParser):
     def __init__(self):
@@ -35,11 +35,11 @@ class FormParser(HTMLParser):
     def handle_endtag(self,tag):
         if tag=="form":self.inside=False
 
-def post_multipart(opener,form,word):
+def post_multipart(opener,form,word,year):
     import secrets
     boundary="----colombiatransit-"+secrets.token_hex(8)
     values={k:v for k,v in form.fields}
-    values.update({"palabra":word,"pagina":"1"})
+    values.update({"palabra":word,"pagina":"1","a_documento":year})
     data=b"".join((f"--{boundary}\r\nContent-Disposition: form-data; name=\"{k}\"\r\n\r\n{v}\r\n").encode("utf8") for k,v in values.items())
     data+=f"--{boundary}--\r\n".encode()
     req=urllib.request.Request(ENDPOINT,data=data,method="POST",headers={
@@ -75,12 +75,12 @@ def main():
     print("OFFICIAL_FORM_FIELDS",form.fields)
     print("COOKIE_COUNT",len(cj))
     results=[]
-    for word in SEARCHES:
-        status,text=post_multipart(opener,form,word)
+    for word, year in SEARCHES:
+        status,text=post_multipart(opener,form,word,year)
         links,plain=extract(text)
-        d={"search":word,"status":status,"text_prefix":plain,"links":links}
+        d={"search":word,"year":year,"status":status,"text_prefix":plain,"links":links}
         results.append(d)
-        print("SEARCH",word,"status",status,"length",len(text),"links",len(links))
+        print("SEARCH",word,"YEAR",year,"status",status,"length",len(text),"links",len(links))
         print("TEXT",plain[:800])
         for x in links[:20]:
             print("LINK",x["label"],x["url"])
