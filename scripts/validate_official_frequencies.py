@@ -33,7 +33,7 @@ def main():
     if len(rows)!=len(expected):errors.append(f"Expected {len(expected)} legal rows, got {len(rows)}")
     if len(rows)!=len(found):errors.append("Duplicate legal route row")
     if expected!=found:errors.append(f"Legal route identifiers mismatch: missing={sorted(expected-found)}, extra={sorted(found-expected)}")
-    if EXPECTED_MISSING-not found:errors.append(f"Originally missing routes are not covered: {sorted(EXPECTED_MISSING-found)}")
+    if EXPECTED_MISSING - found:errors.append(f"Originally missing routes are not covered: {sorted(EXPECTED_MISSING-found)}")
     n=0
     for row in rows:
         route=row["route"]
