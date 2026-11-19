@@ -1,0 +1,30 @@
+name: Discover public Ibagué stop GIS sources
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "scripts/discover_ibague_stop_gis.py"
+      - ".github/workflows/discover-stop-gis.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Query relevant public ArcGIS catalog entries
+        run: python -u scripts/discover_ibague_stop_gis.py
+      - name: Upload discovery report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ibague-stop-gis-discovery
+          path: build/ibague_stop_arcgis_discovery.json
+          if-no-files-found: warn
