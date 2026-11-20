@@ -116,3 +116,7 @@ All **14** changed routes (30 source trip patterns) are indexed with their Octob
 [Research plan, safety rules and workflow](research/graphhopper_shape_strategy.md) are implemented for the **14 altered routes and 30 original trip patterns**. The first stage builds a pinned-source ordered-stop waypoint manifest. A private GraphHopper `bus` profile (using OSM) can produce provisional road candidates for routes 8/37/50 first, then all 14. Official poster waypoints must be reviewed and inserted per direction to avoid shortest-route detours. **No candidate shape is automatically inserted into the public feed or its generator.**
 
 The [20 November full GraphHopper road-candidate audit](research/graphhopper_full_2026_11_20.md) produced **30 of 30** research-only shapes across all 14 changed routes. Every source stop was within 50 m of a candidate road line. This does **not** certify post-October route changes or authorize GTFS shape replacement; official new-waypoint review is still necessary.
+
+## Source trip pattern and branch-variant QA
+
+[Verified research audit](research/variant_review_details.md) checks route 8's overlapping stop families (49 and 61 common ordered stop IDs), source direction metadata, and the incompletely represented Cay, Juntas, Caiké, 4/7 and route 29 services. [Evidence register](research/variant_rules_2026.csv). Reproducible [offline-first GitHub Action](.github/workflows/audit-variant-patterns.yml) inspects the pinned original, with no automatic GTFS changes.

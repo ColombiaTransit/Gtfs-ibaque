@@ -44,3 +44,20 @@ The [October new-route poster](https://transmusical.gov.co/wp-content/uploads/20
 5. Keep 4/7→7 identity and 29 terminal change as separate variant-adjacent publication gates.
 
 Run this analysis independently of costly GraphHopper routing. Its data are derived from the existing pinned source, and no map or stop data are redistributed in the repository.
+
+## Reproduced source-pattern audit — successful Actions run
+
+[GitHub Actions run 44708507040](https://github.com/ColombiaTransit/Gtfs-ibaque/actions/runs/44708507040) completed successfully. Its short-lived `ibague-variant-source-audit-qa` artifact contains the original-pinned source's `source_variant_report.json`: source pattern IDs, direction labels, first/last source stops, shared ordered stop IDs, and warnings for terminal labels of other routes. The *unlicensed source ZIP itself* is not redistributed.
+
+| Route | Source pattern A | Source pattern B | Confirmed source issue |
+| --- | --- | --- | --- |
+| 8 | `R9` 70 + `R11` 60 stops (49 shared, original directions 0/1) | `R10` 77 + `R12` 75 stops (61 shared, both direction 1) | 2 same-order stop families, 1 direction metadata mismatch; variant service remains unknown |
+| 28 | `R37`: 34 stops | `R38`: 52 stops | Not identifiable as separate Caiké timetable variants |
+| 35 | `R45`: 37 stops | `R46`: 34 stops | Normal/extended Cay branch not separately present as confirmed pattern |
+| 48 | `R53`: 17 stops | `R54`: 85 stops | Incomplete/asymmetric source patterns: no supported normal-versus-Juntas assignment |
+| 4/7 | `R5`: 70 stops | `R6`: 32 stops | Direction asymmetry; separate 4 and 7 not reconciled |
+| 29 | `R39`: 5 stops | `R40`: 44 stops | Severe unequal coverage; do not treat as two fully symmetric terminal services |
+
+**Terminal-name caution:** Some source patterns include synthetic or shared stops with another route number in their name. In route 8, the `R10` final stop is labeled `Terminal Inicio - Ruta 37 Ida` and `R12` also visits route-37 terminal markers; this is a *source stop labeling/cross-route issue to inspect*, not proof of a bus route transfer, a valid terminal, or a third independent variant. Avoid deleting or renaming these stop records without direction/geometry evidence.
+
+**Operational conclusion unchanged:** no version of `build_gtfs.py` has been authorized to change trip assignments or headways from these source-pattern similarities alone. All operational variant checks remain open. The automated audit can be rerun via [workflow](../.github/workflows/audit-variant-patterns.yml), without repeating the 182 GraphHopper routing queries.
