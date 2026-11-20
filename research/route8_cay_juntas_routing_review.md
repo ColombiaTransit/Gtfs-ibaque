@@ -51,3 +51,7 @@ The University GTFS's `TRIP_R54` starts near **4.52578, -75.31056**, essentially
 **Do not interpret these numbers as a confirmed branch length.** The old route 35 directions have substantially different nearest source termini. `TRIP_R45`'s nearest recorded stop to Cay is about 6.1 km away in a straight line, compared to 4.0 km for `TRIP_R46`. The branch needs accurate source anchoring, matching official turns and directional boarding stops. For route 48, `TRIP_R54` originates near Villa Restrepo, roughly 3.6 km straight-line from the village center of Juntas. The 05:00 and 05:40 Juntas departures still require an approved Juntas departure stop and the full ordered stop sequence.
 
 The zipped [QA artifact](https://github.com/ColombiaTransit/Gtfs-ibaque/actions/runs/44711047487) contains candidate GeoJSON and source-to-road QA. This repository carries a metadata-only [CSV summary](branch_graphhopper_results_2026_11_20.csv); derived geometry is kept only in the temporary Actions artifact pending source licensing.
+
+## Additional source-level route validation reference
+
+The [variant route validation evidence matrix](variant_route_validation_sources_2026_11_20.md) separates official raster route maps, conditional dispatch rules, source trip patterns, OSM GraphHopper candidates, and secondary Juntas ordered stop lists. It also warns that the route 35 Cay extension is **not drawn on the official main-route map** and the route 48 Juntas extension is **not drawn beyond Villa Restrepo**.
