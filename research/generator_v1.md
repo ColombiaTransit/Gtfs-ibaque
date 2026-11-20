@@ -77,3 +77,21 @@ The weekly `calendar.txt` rows remain unchanged (`CT_WK` Mon–Fri, `CT_SA` Sat,
 A Sunday holiday produces **no extra records** because `CT_SU` is already active. The generator audits the effective GTFS service for **every date** in the generated range: exactly one of `CT_WK`, `CT_SA`, or `CT_SU` must be active, and any holiday must result in `CT_SU`. A failed audit aborts the build.
 
 The generator report now records `holiday_dates_in_window`, `holiday_override_dates`, `holiday_sunday_dates_without_override`, `holiday_effective_service_verified`, and `holiday_details` (including library-provided holiday names, original service and effective service). The CI regression test covers the 2026–2027 year boundary and Monday-shifted holidays, and the workflow asserts actual expected overrides in the produced archive.
+
+## GTFS Fares v2 — official 2026 urban fares
+
+The generator now reads the explicitly reviewed source registers
+[`official_fares_2026.csv`](official_fares_2026.csv) and
+[`fare_route_scope_2026.csv`](fare_route_scope_2026.csv).
+
+- **COP 3,300**: urban bus, Monday through Saturday.
+- **COP 3,400**: urban bus, Sunday and Colombian public holidays.
+- Primary source: [Alcaldía de Ibagué, 30 December 2025](https://ibague.gov.co/portal/noticias/21387-asi-quedaron-definidas-las-tarifas-de-buses-en-ibague).
+- Rural prices were explicitly left unchanged in the official 2026 announcement, but the actual rural amounts are not available; no rural fare is invented.
+- Valid tariff date range is **1 January – 31 December 2026 only**. The generator creates **fare-specific** calendar service IDs (`IBG_FARE_2026_WK`, `IBG_FARE_2026_SA`, `IBG_FARE_2026_SU`) that terminate on 31 December. These carry the same Colombian holiday overrides as the trip calendars, so fare and operating-day rules agree but the urban 2026 price does **not** leak into 2027.
+- `fare_products.txt`, `fare_leg_rules.txt`, `timeframes.txt`, `networks.txt`, `route_networks.txt` implement fares v2. Each operating route is assigned either the *provisionally urban* network or the *unverified fare* network. **The unverified network has no fare rules**; do not assume the urban price applies.
+- Scope exclusion (pending route/branch verification): 4/7, 28, 29, 35, 48. This is a *conservative modeling decision*, not a claim that every segment of these routes is rural. Confirm all other route scopes before publication. Separate fares for mixed-route urban/rural portions would require stop/area/route variant evidence.
+- No fare is generated for 2027-only builds; for a cross-year preview, tariffs are valid only on the intersecting 2026 dates. Fare validity is independent of the GTFS calendar length.
+- No discount program, special ticket media, integration benefit, or free-transfer rule is implied by the announcements. No `fare_transfer_rules.txt` is generated.
+
+The report's `fares_v2` section records the official amounts, source URL, included and excluded route labels, the tariff validity dates, and the fare-only service calendar audit results.

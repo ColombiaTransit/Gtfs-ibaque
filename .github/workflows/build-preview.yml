@@ -5,8 +5,12 @@ on:
   push:
     paths:
       - scripts/build_gtfs.py
+      - scripts/fare_v2.py
       - tests/test_build_gtfs.py
+      - tests/test_fare_v2.py
       - research/official_resolution_005549_frequencies.csv
+      - research/official_fares_2026.csv
+      - research/fare_route_scope_2026.csv
       - .github/workflows/build-preview.yml
 
 permissions:
@@ -24,7 +28,7 @@ jobs:
       - name: Install Colombia holiday calendar dependency
         run: python -m pip install 'holidays>=0.50,<1.0'
       - name: Offline deterministic generator tests
-        run: python -m unittest discover -s tests -p 'test_build_gtfs.py' -v
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
       - name: Build from SHA-256 pinned university GTFS
         shell: bash
         run: |
@@ -68,6 +72,40 @@ jobs:
           print('Colombia holiday overrides checked:', report['holiday_override_dates'])
           print('Holiday names and dates:', report['holiday_details'])
           PYHOLIDAYS
+      - name: Verify bounded Fares v2 and holiday prices
+        shell: bash
+        run: |
+          python - <<'PYFARES'
+          import csv, io, json, zipfile
+          from pathlib import Path
+          def rows(z, name):
+              return list(csv.DictReader(io.TextIOWrapper(z.open(name), encoding='utf-8')))
+          report = json.loads(Path('build/ibague_generator_report.json').read_text(encoding='utf-8'))
+          fares = report['fares_v2']
+          assert fares['fare_v2_active'] and fares['fare_effective_calendar_verified']
+          assert fares['fare_validity_end'] == '2026-12-31'
+          assert fares['urban_fare_mapped_routes'] == 25
+          with zipfile.ZipFile('build/ibague-research-preview.zip') as z:
+              products = rows(z, 'fare_products.txt')
+              assert {x['amount'] for x in products} == {'3300', '3400'}
+              assert all(x['currency'] == 'COP' for x in products)
+              frames = rows(z, 'timeframes.txt')
+              assert len(frames) == 3
+              rules = rows(z, 'fare_leg_rules.txt')
+              assert len(rules) == 2
+              scope = rows(z, 'route_networks.txt')
+              assert len(scope) == 30
+              calendar = rows(z, 'calendar.txt')
+              fare_services = {x['service_id'] for x in calendar if x['service_id'].startswith('IBG_FARE_2026_')}
+              assert len(fare_services) == 3
+              assert all(x['end_date'] == '20261231' for x in calendar if x['service_id'] in fare_services)
+              exceptions = rows(z, 'calendar_dates.txt')
+              for date in ('20261208', '20261225'):
+                  assert {'service_id':'IBG_FARE_2026_WK','date':date,'exception_type':'2'} in exceptions
+                  assert {'service_id':'IBG_FARE_2026_SU','date':date,'exception_type':'1'} in exceptions
+              assert not any(x['service_id'].startswith('IBG_FARE_2026_') and x['date'] >= '20270101' for x in exceptions)
+          print('Confirmed Fares v2, urban route scope, 2026 holiday exceptions, and 2027 expiry')
+          PYFARES
       - name: Enforce no MobilityData validation errors
         shell: bash
         run: |

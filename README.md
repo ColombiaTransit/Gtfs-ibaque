@@ -99,3 +99,10 @@ No revised GTFS feed has been generated or published yet.
 ## Research-only preview generator
 
 The first reproducible local GTFS preview generator is in [`scripts/build_gtfs.py`](scripts/build_gtfs.py), with offline tests and [GitHub Actions QA workflow](.github/workflows/build-preview.yml). It uses the pinned May 2026 source, official October 2026 headways, provisional historical HP/HV/NOC intervals, and Colombian holiday service. It has **not** been published as a new feed: stop names, revised route geometries, ambiguous route variants, and redistribution rights still require review. Read the [generator v1 documentation](research/generator_v1.md) and its `ibague_generator_report.json` before interpreting output as a schedule.
+
+## Preliminary fares v2 (2026 urban prices only)
+
+`scripts/fare_v2.py` uses the official Ibagué 2026 urban ticket prices from
+[`research/official_fares_2026.csv`](research/official_fares_2026.csv):
+**COP 3,300 Mon–Sat** and **COP 3,400 Sunday/Colombian holidays**.
+The fare-only services expire on **31 December 2026**, even if the GTFS preview continues into 2027. Rural/mixed services have an explicit conservative unpriced network and cannot accidentally inherit the urban fare. See [fare modeling and excluded routes](research/generator_v1.md).

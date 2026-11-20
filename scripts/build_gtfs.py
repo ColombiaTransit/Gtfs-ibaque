@@ -20,6 +20,8 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
+from fare_v2 import make_2026_fares
+
 SOURCE_SHA256 = "7cf772c89dec4ac1a0f97e709c9db519ad8d146caaf2121fe624c149ed29c050"
 SOURCE_URL = "https://raw.githubusercontent.com/omtu-unibague/gtfs-ibague/55be037eaeaa7031eb095af53929e4ef2caaba9a/gtfs_ibague.zip"
 REQUIRED = {"agency.txt", "routes.txt", "stops.txt", "shapes.txt", "trips.txt", "stop_times.txt"}
@@ -248,7 +250,9 @@ def csv_bytes(rows: list[dict], fields: list[str] | None = None) -> bytes:
 
 
 def build(source: dict[str, list[dict]], legal: list[dict], start: dt.date, days: int,
-          holidays: set[dt.date] | dict[dt.date, str], stop_overrides: Path | None = None) -> tuple[dict[str, bytes], dict]:
+          holidays: set[dt.date] | dict[dt.date, str], stop_overrides: Path | None = None,
+          fare_rates: list[dict] | None = None,
+          fare_scope: list[dict] | None = None) -> tuple[dict[str, bytes], dict]:
     if not 1 <= days <= 366:
         raise ValueError("days must be 1..366")
     original_routes, original_trips = source["routes.txt"], source["trips.txt"]
@@ -262,6 +266,13 @@ def build(source: dict[str, list[dict]], legal: list[dict], start: dt.date, days
     applied = approved_stop_names(stops, stop_overrides)
     base_calendar, exceptions = service_calendar(start, days, holidays)
     holiday_details = audit_holiday_calendar(base_calendar, exceptions, start, days, holidays)
+    if (fare_rates is None) != (fare_scope is None):
+        raise ValueError("Fare amounts and route scope must be provided together")
+    fare_tables, fare_cal, fare_exceptions, fare_report = ({}, [], [], {"fare_v2_active": False})
+    if fare_rates is not None and fare_scope is not None:
+        fare_tables, fare_cal, fare_exceptions, fare_report = make_2026_fares(
+            original_routes, fare_rates, fare_scope, start, days, holidays
+        )
     stop_times_by_trip: dict[str, list[dict]] = collections.defaultdict(list)
     for row in source["stop_times.txt"]:
         stop_times_by_trip[row["trip_id"]].append(row)
@@ -341,8 +352,8 @@ def build(source: dict[str, list[dict]], legal: list[dict], start: dt.date, days
         "trips.txt": csv_bytes(out_trips),
         "stop_times.txt": csv_bytes(out_times),
         "frequencies.txt": csv_bytes(out_freq, ["trip_id", "start_time", "end_time", "headway_secs", "exact_times"]),
-        "calendar.txt": csv_bytes(base_calendar),
-        "calendar_dates.txt": csv_bytes(exceptions, ["service_id", "date", "exception_type"]),
+        "calendar.txt": csv_bytes(base_calendar + fare_cal),
+        "calendar_dates.txt": csv_bytes(exceptions + fare_exceptions, ["service_id", "date", "exception_type"]),
         "feed_info.txt": csv_bytes([{
             "feed_publisher_name": "ColombiaTransit (unpublished research preview)",
             "feed_publisher_url": "https://github.com/ColombiaTransit/Gtfs-ibaque",
@@ -351,9 +362,11 @@ def build(source: dict[str, list[dict]], legal: list[dict], start: dt.date, days
             "feed_version": "research-preview-" + start.strftime("%Y%m%d"),
         }]),
     }
-    # A well-formed, nonempty calendar_dates header even when no exceptions fall in range.
-    if not exceptions:
+    # A well-formed calendar_dates header even when no exceptions fall in range.
+    if not (exceptions or fare_exceptions):
         tables["calendar_dates.txt"] = b"service_id,date,exception_type\n"
+    for filename, rows in fare_tables.items():
+        tables[filename] = csv_bytes(rows)
     # Strip optional stale feed_info entries from upstream rather than preserving
     # their inaccurate claim of validity to 2030.
     report = {
@@ -370,6 +383,7 @@ def build(source: dict[str, list[dict]], legal: list[dict], start: dt.date, days
         "holiday_sunday_dates_without_override": sum(not h["override_required"] for h in holiday_details),
         "holiday_effective_service_verified": True,
         "holiday_details": holiday_details,
+        "fares_v2": fare_report,
         "excluded_patterns": excluded, "uncovered_pattern_day": uncovered,
         "provisional_equal_variant_splits": pattern_split,
         "route_28_unmodeled_evening_minutes": "18:00-19:30 weekdays/Saturdays (clipped to route window)",
@@ -404,6 +418,8 @@ def main() -> int:
     parser.add_argument("--days", type=int, default=90)
     parser.add_argument("--legal", type=Path, default=Path("research/official_resolution_005549_frequencies.csv"))
     parser.add_argument("--approved-stop-overrides", type=Path)
+    parser.add_argument("--fare-rates", type=Path, default=Path("research/official_fares_2026.csv"))
+    parser.add_argument("--fare-route-scope", type=Path, default=Path("research/fare_route_scope_2026.csv"))
     parser.add_argument("--output", type=Path, default=Path("build/ibague-research-preview.zip"))
     parser.add_argument("--report", type=Path, default=Path("build/ibague_generator_report.json"))
     args = parser.parse_args()
@@ -417,7 +433,9 @@ def main() -> int:
     source_tables = read_gtfs(payload)
     official = read_csv_file(args.legal)
     dates = get_colombia_holidays(start, args.days)
-    tables, report = build(source_tables, official, start, args.days, dates, args.approved_stop_overrides)
+    tables, report = build(source_tables, official, start, args.days, dates, args.approved_stop_overrides,
+                           fare_rates=read_csv_file(args.fare_rates),
+                           fare_scope=read_csv_file(args.fare_route_scope))
     write_zip(args.output, tables)
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
