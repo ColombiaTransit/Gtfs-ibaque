@@ -1,0 +1,75 @@
+name: Ibagué — OSM GraphHopper changed-route shape candidates
+
+on:
+  workflow_dispatch:
+    inputs:
+      route_labels:
+        description: 'October 2026 changed route labels (comma-separated) or all'
+        required: false
+        default: '8,37,50'
+      max_patterns:
+        description: 'Maximum GTFS route-direction patterns for this research run (1–30)'
+        required: false
+        default: '8'
+  push:
+    paths:
+      - scripts/route_changed_shapes_graphhopper.py
+      - tests/test_route_changed_shapes_graphhopper.py
+      - .github/workflows/review-october-graphhopper-shapes.yml
+
+permissions:
+  contents: read
+
+jobs:
+  graphhopper-road-candidates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GRAPHHOPPER_URL: ${{ vars.GRAPHHOPPER_URL }}
+      GRAPHHOPPER_PROFILE: ${{ vars.GRAPHHOPPER_PROFILE || 'bus' }}
+      CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+      CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+      ROUTE_LABELS: ${{ inputs.route_labels || '8,37,50' }}
+      MAX_PATTERNS: ${{ inputs.max_patterns || '8' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline source parsing and GraphHopper client tests
+        run: python -m unittest discover -s tests -p 'test_route_changed_shapes_graphhopper.py' -v
+      - name: Prepare pinned-source stop-order inventory and waypoint manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/route_changed_shapes_graphhopper.py \
+            --download --routes "$ROUTE_LABELS" --max-patterns "$MAX_PATTERNS" \
+            --output build/ibague-graphhopper
+      - name: Create provisional OSM/GraphHopper bus shapes (never publish)
+        if: env.GRAPHHOPPER_URL != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '::add-mask::'"$GRAPHHOPPER_URL"
+          python scripts/route_changed_shapes_graphhopper.py \
+            --download --routes "$ROUTE_LABELS" --max-patterns "$MAX_PATTERNS" \
+            --manifest build/ibague-graphhopper/route_waypoint_review_manifest.json \
+            --output build/ibague-graphhopper --route
+      - name: Record a missing organization GraphHopper URL
+        if: env.GRAPHHOPPER_URL == ''
+        run: |
+          echo '::warning::GRAPHHOPPER_URL organization variable missing; only waypoint manifest was produced.'
+          echo 'GraphHopper calls were not performed.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Publish research-only artifacts for route geometry review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ibague-osm-graphhopper-shapes-research-only
+          path: |
+            build/ibague-graphhopper/route_waypoint_review_manifest.json
+            build/ibague-graphhopper/candidate_road_shapes_RESEARCH_ONLY.geojson
+            build/ibague-graphhopper/candidate_shapes_NOT_GTFS.txt
+            build/ibague-graphhopper/pattern_route_qa.json
+            build/ibague-graphhopper/summary.json
+          if-no-files-found: warn
+          retention-days: 7

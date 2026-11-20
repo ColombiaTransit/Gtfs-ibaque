@@ -110,3 +110,7 @@ The fare-only services expire on **31 December 2026**, even if the GTFS preview 
 ## October 2026 modified route geometry audit
 
 All **14** changed routes (30 source trip patterns) are indexed with their October 2026 [official new-route maps and specific street changes](research/route_changes_2026_10_19.md) and [machine-readable status register](research/route_changes_2026_10_19.csv). The November supplementary GTFS is not necessarily current for these geometry changes. All shape replacements are **pending** and none have been applied to the preview generator.
+
+## OSM GraphHopper shape reconstruction (October 2026 changed routes)
+
+[Research plan, safety rules and workflow](research/graphhopper_shape_strategy.md) are implemented for the **14 altered routes and 30 original trip patterns**. The first stage builds a pinned-source ordered-stop waypoint manifest. A private GraphHopper `bus` profile (using OSM) can produce provisional road candidates for routes 8/37/50 first, then all 14. Official poster waypoints must be reviewed and inserted per direction to avoid shortest-route detours. **No candidate shape is automatically inserted into the public feed or its generator.**
