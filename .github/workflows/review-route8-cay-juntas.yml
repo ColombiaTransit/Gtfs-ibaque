@@ -1,0 +1,104 @@
+name: Review Ibagué route 8 directions and Cay/Juntas branches
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - scripts/review_route8_and_branches.py
+      - tests/test_review_route8_and_branches.py
+      - .github/workflows/review-route8-cay-juntas.yml
+
+permissions:
+  contents: read
+
+jobs:
+  variant-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Unit tests (no external traffic)
+        run: python -m unittest discover -s tests -p 'test_review_route8_and_branches.py' -v
+      - name: Prepare SHA256-pinned route 8 directions and route 35/48 OSM branch candidates
+        run: |
+          python scripts/review_route8_and_branches.py --download \
+            --output build/variant-branch-review
+      - name: Route rural OSM reference candidates with self-hosted GraphHopper bus profile
+        if: ${{ vars.GRAPHHOPPER_URL != '' }}
+        env:
+          GRAPHHOPPER_URL: ${{ vars.GRAPHHOPPER_URL }}
+          GRAPHHOPPER_PROFILE: ${{ vars.GRAPHHOPPER_PROFILE || 'bus' }}
+          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+        run: |
+          echo "::add-mask::$GRAPHHOPPER_URL"
+          python scripts/review_route8_and_branches.py --download --route \
+            --output build/variant-branch-review
+      - name: Audit official-direction evidence and separation from GTFS
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('build/variant-branch-review/branch_variant_manifest.json').read_text())
+          p={x['source_trip_id']:x for x in d['route8']['source_trips']}
+          assert len(p)==4
+          assert p['TRIP_R9']['poster_direction_label']=='IDA'
+          assert p['TRIP_R11']['poster_direction_label']=='IDA'
+          assert p['TRIP_R10']['poster_direction_label']=='VUELTA'
+          assert p['TRIP_R12']['poster_direction_label']=='VUELTA'
+          assert [k for k,x in p.items() if x['direction_metadata_mismatch']]==['TRIP_R11']
+          assert p['TRIP_R11']['candidate_west_shortening']
+          assert p['TRIP_R12']['candidate_west_shortening']
+          assert all(not x['legal_service_variant_confirmed'] for x in p.values())
+          assert len(d['branches'])==4
+          assert {x['route'] for x in d['branches']}=={'35','48'}
+          assert all(not x['gtfs_service_or_frequency_modified'] for x in d['branches'])
+          geo=Path('build/variant-branch-review/osm_branch_graphhopper_candidates_RESEARCH_ONLY.geojson')
+          if geo.exists():
+            g=json.loads(geo.read_text())
+            assert not g['metadata']['official_branch_ways_verified']
+            print('GraphHopper branch candidates:',g['metadata']['branches_successful'])
+          print('Route 8 source direction mismatch confirmed; source stop and operating data unchanged.')
+          PY
+      - name: Summary (without private URLs)
+        if: always()
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          p=Path('build/variant-branch-review/branch_variant_manifest.json')
+          if not p.exists():
+            print('No manifest: preparation failed');raise SystemExit(0)
+          d=json.loads(p.read_text())
+          print('## Route 8: source versus official October poster direction')
+          print('| Source trip | Source `direction_id` | Official map direction | West terminal gap (m) |')
+          print('| --- | --- | --- | ---: |')
+          for row in d['route8']['source_trips']:
+            print(f"| {row['source_trip_id']} | {row['source_direction_id']} | {row['poster_direction_label']} | {row['west_endpoint_distance_from_long_pattern_m']} |")
+          print('\n## Cay and Juntas: OSM reference candidate only')
+          print('| Route | Original pattern | Source endpoint to OSM reference (m) |')
+          print('| --- | --- | ---: |')
+          for r in d['branches']:
+            print(f"| {r['route']} | {r['source_trip_id']} | {r['straight_line_terminal_to_candidate_m']} |")
+          r=Path('build/variant-branch-review/branch_route_qa.json')
+          if r.exists():
+            print('\nGraphHopper branch candidate statuses:')
+            for x in json.loads(r.read_text()):
+              print(f"- {x['route']}/{x['source_trip_id']}: {x['routing_status']} ({x.get('graphhopper_distance_m','unavailable')} m)")
+          print('\n**Not accepted for GTFS:** no official branch boarding stop, timetable pattern, or 2026 short-turn dispatch verified.')
+          PY
+      - name: Archive research only, not licensed GTFS or production changes
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ibague-route8-cay-juntas-variant-road-qa
+          path: |
+            build/variant-branch-review/branch_variant_manifest.json
+            build/variant-branch-review/route8_direction_evidence.csv
+            build/variant-branch-review/branch_route_qa.json
+            build/variant-branch-review/osm_branch_graphhopper_candidates_RESEARCH_ONLY.geojson
+          if-no-files-found: warn
+          retention-days: 7

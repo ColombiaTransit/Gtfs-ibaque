@@ -120,3 +120,7 @@ The [20 November full GraphHopper road-candidate audit](research/graphhopper_ful
 ## Source trip pattern and branch-variant QA
 
 [Verified research audit](research/variant_review_details.md) checks route 8's overlapping stop families (49 and 61 common ordered stop IDs), source direction metadata, and the incompletely represented Cay, Juntas, Caiké, 4/7 and route 29 services. [Evidence register](research/variant_rules_2026.csv). Reproducible [offline-first GitHub Action](.github/workflows/audit-variant-patterns.yml) inspects the pinned original, with no automatic GTFS changes.
+
+## October 2026 route 8 and rural branch investigation
+
+The [route 8 / Cay / Juntas research review](research/route8_cay_juntas_routing_review.md) combines the official October map's IDA/VUELTA direction with the pinned 2026 source stop pattern geography. `TRIP_R11` is directionally inconsistent in the original. Research-only GraphHopper bus-road candidates connect existing route 35 and route 48 source endpoints toward OSM Cay and Juntas reference locations. **No schedule, stop, production shape or headway changes are authorized by this research.**
