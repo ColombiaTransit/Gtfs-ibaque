@@ -1,7 +1,7 @@
 """Test Ibagué variant audit without network access or copied upstream GTFS."""
 import sys, unittest
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from audit_variant_patterns import shared_order, route_family_pairs, audited
 
 
