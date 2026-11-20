@@ -1,0 +1,64 @@
+name: Build Ibagué research GTFS preview
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - scripts/build_gtfs.py
+      - tests/test_build_gtfs.py
+      - research/official_resolution_005549_frequencies.csv
+      - .github/workflows/build-preview.yml
+
+permissions:
+  contents: read
+
+jobs:
+  research-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Colombia holiday calendar dependency
+        run: python -m pip install 'holidays>=0.50,<1.0'
+      - name: Offline deterministic generator tests
+        run: python -m unittest discover -s tests -p 'test_build_gtfs.py' -v
+      - name: Build from SHA-256 pinned university GTFS
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/validate_official_frequencies.py --output build/legal_frequency_audit.json
+          python scripts/build_gtfs.py \
+            --download \
+            --start-date 20261120 \
+            --days 90 \
+            --output build/ibague-research-preview.zip \
+            --report build/ibague_generator_report.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Run MobilityData validator v8.0.1 on preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 2 \
+            'https://github.com/MobilityData/gtfs-validator/releases/download/v8.0.1/gtfs-validator-8.0.1-cli.jar' \
+            -o /tmp/gtfs-validator-cli.jar
+          echo '19293ddd9b6f954f216d4f12054bd8a3232921751c4484339e339764a91000e2  /tmp/gtfs-validator-cli.jar' | sha256sum -c -
+          mkdir -p build/validator
+          java -Xmx2g -jar /tmp/gtfs-validator-cli.jar \
+            -i build/ibague-research-preview.zip -o build/validator
+      - name: Publish QA reports only (NOT the unlicensed source-derived GTFS ZIP)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ibague-research-preview-qa
+          path: |
+            build/legal_frequency_audit.json
+            build/ibague_generator_report.json
+            build/validator/**
+          if-no-files-found: warn
+          retention-days: 14
