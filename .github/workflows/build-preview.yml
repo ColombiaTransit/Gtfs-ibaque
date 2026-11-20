@@ -51,6 +51,23 @@ jobs:
           mkdir -p build/validator
           java -Xmx2g -jar /tmp/gtfs-validator-cli.jar \
             -i build/ibague-research-preview.zip -o build/validator
+      - name: Verify Colombian holiday exceptions in generated feed
+        shell: bash
+        run: |
+          python - <<'PYHOLIDAYS'
+          import csv, io, json, zipfile
+          from pathlib import Path
+          report = json.loads(Path('build/ibague_generator_report.json').read_text(encoding='utf-8'))
+          assert report['holiday_effective_service_verified']
+          with zipfile.ZipFile('build/ibague-research-preview.zip') as archive:
+              exceptions = list(csv.DictReader(io.TextIOWrapper(archive.open('calendar_dates.txt'), encoding='utf-8')))
+          for date in ('20261208', '20261225', '20270101', '20270111'):
+              assert {'service_id': 'CT_WK', 'date': date, 'exception_type': '2'} in exceptions, date
+              assert {'service_id': 'CT_SU', 'date': date, 'exception_type': '1'} in exceptions, date
+          assert len(exceptions) == 2 * report['holiday_override_dates']
+          print('Colombia holiday overrides checked:', report['holiday_override_dates'])
+          print('Holiday names and dates:', report['holiday_details'])
+          PYHOLIDAYS
       - name: Enforce no MobilityData validation errors
         shell: bash
         run: |

@@ -131,7 +131,7 @@ def template_offsets(rows: list[dict[str, str]]) -> tuple[list[dict[str, str]], 
         return [], f"invalid_existing_stop_time:{e}"
 
 
-def service_calendar(start: dt.date, days: int, holidays: set[dt.date]) -> tuple[list[dict], list[dict]]:
+def service_calendar(start: dt.date, days: int, holidays: set[dt.date] | dict[dt.date, str]) -> tuple[list[dict], list[dict]]:
     end = start + dt.timedelta(days=days - 1)
     base = []
     for day, weekly in (("WK", [1, 1, 1, 1, 1, 0, 0]),
@@ -150,13 +150,68 @@ def service_calendar(start: dt.date, days: int, holidays: set[dt.date]) -> tuple
     return base, exceptions
 
 
-def get_colombia_holidays(start: dt.date, days: int) -> set[dt.date]:
+def get_colombia_holidays(start: dt.date, days: int) -> dict[dt.date, str]:
+    """Return Colombia's actual holiday dates, including those moved to Mondays.
+
+    Keep the library's holiday labels in the research audit. Generate all years
+    touched by the service window (including a December/January transition).
+    """
     try:
         import holidays as holidays_module  # type: ignore
     except ImportError as exc:
         raise RuntimeError("Install python-holidays: pip install 'holidays>=0.50,<1'") from exc
     end = start + dt.timedelta(days=days - 1)
-    return set(holidays_module.country_holidays("CO", years=range(start.year, end.year + 1)).keys())
+    country = holidays_module.country_holidays("CO", years=range(start.year, end.year + 1))
+    return {day: str(name) for day, name in country.items() if start <= day <= end}
+
+
+def audit_holiday_calendar(calendar: list[dict], exceptions: list[dict],
+                           start: dt.date, days: int,
+                           holiday_names: set[dt.date] | dict[dt.date, str]) -> list[dict]:
+    """Prove that exactly one effective service is active on every feed date.
+
+    Holiday dates must use CT_SU even if the original weekday was WK or SA.
+    Sundays stay CT_SU without duplicate calendar_dates exceptions. This check
+    fails the generator if an exception is missing, duplicated, or contradictory.
+    """
+    base = {r["service_id"]: r for r in calendar}
+    if set(base) != {"CT_WK", "CT_SA", "CT_SU"}:
+        raise ValueError("Unexpected base calendar services")
+    changes: dict[tuple[dt.date, str], str] = {}
+    for row in exceptions:
+        day = dt.datetime.strptime(row["date"], "%Y%m%d").date()
+        key = (day, row["service_id"])
+        if key in changes or key[1] not in base or row["exception_type"] not in ("1", "2"):
+            raise ValueError(f"Invalid or duplicate calendar_dates entry: {row}")
+        changes[key] = row["exception_type"]
+
+    holiday_details = []
+    for offset in range(days):
+        day = start + dt.timedelta(days=offset)
+        original = "CT_SU" if day.weekday() == 6 else ("CT_SA" if day.weekday() == 5 else "CT_WK")
+        expected = "CT_SU" if day in holiday_names else original
+        actual = {service_id for service_id, entry in base.items()
+                  if entry[("monday", "tuesday", "wednesday", "thursday",
+                            "friday", "saturday", "sunday")[day.weekday()]] == "1"}
+        for service_id in base:
+            typ = changes.get((day, service_id))
+            if typ == "1":
+                actual.add(service_id)
+            elif typ == "2":
+                actual.discard(service_id)
+        if actual != {expected}:
+            raise ValueError(f"Incorrect effective service {day}: {actual} != {expected}")
+        if day in holiday_names:
+            holiday_details.append({
+                "date": day.strftime("%Y%m%d"),
+                "holiday_name": holiday_names.get(day, "") if isinstance(holiday_names, dict) else "",
+                "original_service_id": original,
+                "effective_service_id": "CT_SU",
+                "override_required": original != "CT_SU",
+            })
+    if any(not start <= date <= start + dt.timedelta(days=days - 1) for date, _ in changes):
+        raise ValueError("calendar_dates exception outside the generated window")
+    return holiday_details
 
 
 def approved_stop_names(stops: list[dict], overrides: Path | None) -> list[dict]:
@@ -193,7 +248,7 @@ def csv_bytes(rows: list[dict], fields: list[str] | None = None) -> bytes:
 
 
 def build(source: dict[str, list[dict]], legal: list[dict], start: dt.date, days: int,
-          holidays: set[dt.date], stop_overrides: Path | None = None) -> tuple[dict[str, bytes], dict]:
+          holidays: set[dt.date] | dict[dt.date, str], stop_overrides: Path | None = None) -> tuple[dict[str, bytes], dict]:
     if not 1 <= days <= 366:
         raise ValueError("days must be 1..366")
     original_routes, original_trips = source["routes.txt"], source["trips.txt"]
@@ -206,6 +261,7 @@ def build(source: dict[str, list[dict]], legal: list[dict], start: dt.date, days
     stops = [dict(s) for s in source["stops.txt"]]
     applied = approved_stop_names(stops, stop_overrides)
     base_calendar, exceptions = service_calendar(start, days, holidays)
+    holiday_details = audit_holiday_calendar(base_calendar, exceptions, start, days, holidays)
     stop_times_by_trip: dict[str, list[dict]] = collections.defaultdict(list)
     for row in source["stop_times.txt"]:
         stop_times_by_trip[row["trip_id"]].append(row)
@@ -310,6 +366,10 @@ def build(source: dict[str, list[dict]], legal: list[dict], start: dt.date, days
         "source_stops": len(stops), "renamed_stops_with_approval": applied,
         "remaining_unnamed_stops": sum("marcador de local" in s["stop_name"].lower() for s in stops),
         "holiday_override_dates": len({e["date"] for e in exceptions}),
+        "holiday_dates_in_window": len(holiday_details),
+        "holiday_sunday_dates_without_override": sum(not h["override_required"] for h in holiday_details),
+        "holiday_effective_service_verified": True,
+        "holiday_details": holiday_details,
         "excluded_patterns": excluded, "uncovered_pattern_day": uncovered,
         "provisional_equal_variant_splits": pattern_split,
         "route_28_unmodeled_evening_minutes": "18:00-19:30 weekdays/Saturdays (clipped to route window)",

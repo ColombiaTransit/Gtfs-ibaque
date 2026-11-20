@@ -8,7 +8,8 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from build_gtfs import (build, clock_segments, fmt, hm, service_calendar, template_offsets, write_zip)
+from build_gtfs import (audit_holiday_calendar, build, clock_segments, fmt, get_colombia_holidays,
+                        hm, service_calendar, template_offsets, write_zip)
 
 
 def legal(route="1"):
@@ -73,6 +74,42 @@ class TestGenerator(unittest.TestCase):
         self.assertEqual(len(overrides), 4)
         self.assertEqual([x["service_id"] for x in overrides], ["CT_WK", "CT_SU", "CT_SA", "CT_SU"])
 
+    def test_actual_colombian_holidays_cross_year_turn_into_sunday_service(self):
+        # Includes a Friday Christmas, Friday New Year's Day and the
+        # Reyes Magos holiday moved to the following Monday under Ley Emiliani.
+        start, days = dt.date(2026, 12, 20), 30
+        colombia = get_colombia_holidays(start, days)
+        for expected in (dt.date(2026, 12, 25), dt.date(2027, 1, 1),
+                         dt.date(2027, 1, 11)):
+            self.assertIn(expected, colombia)
+            self.assertTrue(colombia[expected])
+        self.assertNotIn(dt.date(2027, 1, 6), colombia)
+        cal, exceptions = service_calendar(start, days, colombia)
+        audit = audit_holiday_calendar(cal, exceptions, start, days, colombia)
+        self.assertTrue(all(x["effective_service_id"] == "CT_SU" for x in audit))
+        for expected in ("20261225", "20270101", "20270111"):
+            self.assertIn({"service_id": "CT_WK", "date": expected, "exception_type": "2"}, exceptions)
+            self.assertIn({"service_id": "CT_SU", "date": expected, "exception_type": "1"}, exceptions)
+        self.assertEqual(len(exceptions), 6)
+        self.assertEqual({x["date"] for x in audit}, {"20261225", "20270101", "20270111"})
+
+    def test_no_duplicate_sunday_holiday_exceptions(self):
+        # A Sunday holiday is already covered by CT_SU's weekly calendar.
+        start = dt.date(2026, 11, 22)
+        country = {start: "Sunday holiday", dt.date(2026, 11, 23): "Monday holiday"}
+        cal, exceptions = service_calendar(start, 3, country)
+        self.assertEqual(len(exceptions), 2)
+        self.assertFalse(any(row["date"] == "20261122" for row in exceptions))
+        details = audit_holiday_calendar(cal, exceptions, start, 3, country)
+        self.assertFalse(details[0]["override_required"])
+        self.assertTrue(details[1]["override_required"])
+
+    def test_calendar_audit_rejects_missing_sunday_activation(self):
+        start = dt.date(2026, 12, 25)
+        cal, exceptions = service_calendar(start, 1, {start})
+        with self.assertRaisesRegex(ValueError, "Incorrect effective service"):
+            audit_holiday_calendar(cal, exceptions[:1], start, 1, {start})
+
     def test_equal_split_does_not_double_frequency(self):
         tables, report = build(source(2), legal(), dt.date(2026, 11, 20), 30, set())
         rows = parse(tables["frequencies.txt"])
@@ -84,6 +121,8 @@ class TestGenerator(unittest.TestCase):
         self.assertEqual(parse(tables["feed_info.txt"])[0]["feed_lang"], "es")
         self.assertFalse(report["publication_ready"])
         self.assertEqual(report["remaining_unnamed_stops"], 1)
+        self.assertTrue(report["holiday_effective_service_verified"])
+        self.assertEqual(report["holiday_dates_in_window"], 0)
         self.assertEqual(len(parse(tables["trips.txt"])), 6)
         self.assertEqual(len(parse(tables["stop_times.txt"])), 12)
         with tempfile.TemporaryDirectory() as td:

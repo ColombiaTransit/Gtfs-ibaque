@@ -62,3 +62,18 @@ python scripts/build_gtfs.py --download --start-date 20261120 \
 6. Manually vet any of the 78 placeholder stop-name fixes before applying them.
 
 Do not infer timetable correctness from a successful build or validator run.
+
+## Confirmed GTFS holiday exception implementation
+
+`python-holidays` is the sole source for Colombia public holidays (`country_holidays("CO")`); dates moved to Mondays are included as actual holiday dates. The generator loads **every year crossed** by the requested service period, including year changes such as December 2026 to January 2027.
+
+The weekly `calendar.txt` rows remain unchanged (`CT_WK` Mon–Fri, `CT_SA` Sat, `CT_SU` Sun). For each Colombian holiday on Mon–Fri or Saturday, `calendar_dates.txt` has **exactly two records**:
+
+| service_id | date | exception_type | meaning |
+| --- | --- | --- | --- |
+| `CT_WK` / `CT_SA` | YYYYMMDD | `2` | Remove its normal weekday/Saturday service |
+| `CT_SU` | YYYYMMDD | `1` | Add Sunday service for the holiday |
+
+A Sunday holiday produces **no extra records** because `CT_SU` is already active. The generator audits the effective GTFS service for **every date** in the generated range: exactly one of `CT_WK`, `CT_SA`, or `CT_SU` must be active, and any holiday must result in `CT_SU`. A failed audit aborts the build.
+
+The generator report now records `holiday_dates_in_window`, `holiday_override_dates`, `holiday_sunday_dates_without_override`, `holiday_effective_service_verified`, and `holiday_details` (including library-provided holiday names, original service and effective service). The CI regression test covers the 2026–2027 year boundary and Monday-shifted holidays, and the workflow asserts actual expected overrides in the produced archive.
