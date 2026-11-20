@@ -53,3 +53,7 @@ The original University's source archive is not redistributed in this repository
 **Reason:** prior stop-first geometry candidates approach the park area but the pinned source GTFS lacks identified boarding positions at the entrance. Geometry proximity to a park reference point does not prove an official GTFS stop. **Do not automatically promote candidate locations to published stops.**
 
 Sources: [official route 28 poster](https://transmusical.gov.co/wp-content/uploads/2026/10/Ruta-28-scaled.png), [Alcaldía itinerary changes](https://www.ibague.gov.co/portal/noticias/23334-este-lunes-cambiaran-los-recorridos-de-14-rutas-de-busetas-en-ibague-conozca-sus), and [Parque Caiké FAQ](https://caike.com.co/preguntas-frecuentes/).
+
+## Cross-route worklist for all changed routes
+
+Route 28 is **one** of the pending stop/geometry reviews. The [consolidated route geometry, boarding-stop and variant worklist](route_geometry_stop_worklist.md) covers **all 14 official October modified routes plus route 35 Cay**, with priority, action type and source links; the [CSV](route_geometry_stop_worklist.csv) tracks each case's status. Physical stops are added only after location, travel direction, boarding side and source stop-ID matching are verified.
