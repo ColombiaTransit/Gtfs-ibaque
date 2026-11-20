@@ -88,7 +88,7 @@ jobs:
           assert fares['urban_fare_mapped_routes'] == 25
           with zipfile.ZipFile('build/ibague-research-preview.zip') as z:
               products = rows(z, 'fare_products.txt')
-              assert {x['amount'] for x in products} == {'3300', '3400'}
+              assert {x['amount'] for x in products} == {'3300.00', '3400.00'}
               assert all(x['currency'] == 'COP' for x in products)
               frames = rows(z, 'timeframes.txt')
               assert len(frames) == 3

@@ -143,9 +143,9 @@ def make_2026_fares(routes: list[dict[str, str]], rates: list[dict[str, str]],
             for route in routes],
         "fare_products.txt": [
             {"fare_product_id": "IBG_URBAN_2026_REGULAR", "fare_product_name": "Pasaje urbano lunes a sábado 2026",
-             "amount": "3300", "currency": "COP"},
+             "amount": "3300.00", "currency": "COP"},
             {"fare_product_id": "IBG_URBAN_2026_DOM_FEST", "fare_product_name": "Pasaje urbano domingo y festivo 2026",
-             "amount": "3400", "currency": "COP"},
+             "amount": "3400.00", "currency": "COP"},
         ],
         "timeframes.txt": [
             {"timeframe_group_id": "IBG_2026_REGULAR", "start_time": "00:00:00",

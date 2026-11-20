@@ -26,7 +26,7 @@ class TestFareV2(unittest.TestCase):
         tables, calendar, exc, report = self.generate(dt.date(2026,11,20), 90,
                                                        {dt.date(2026,12,8),dt.date(2026,12,25),
                                                         dt.date(2027,1,1),dt.date(2027,1,11)})
-        self.assertEqual({x['amount'] for x in tables['fare_products.txt']}, {'3300','3400'})
+        self.assertEqual({x['amount'] for x in tables['fare_products.txt']}, {'3300.00','3400.00'})
         self.assertEqual({x['currency'] for x in tables['fare_products.txt']}, {'COP'})
         self.assertEqual(len(tables['fare_leg_rules.txt']),2)
         self.assertEqual(len(tables['timeframes.txt']),3)
