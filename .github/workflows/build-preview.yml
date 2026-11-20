@@ -51,6 +51,20 @@ jobs:
           mkdir -p build/validator
           java -Xmx2g -jar /tmp/gtfs-validator-cli.jar \
             -i build/ibague-research-preview.zip -o build/validator
+      - name: Enforce no MobilityData validation errors
+        shell: bash
+        run: |
+          python - <<'PYVALIDATOR'
+          import json
+          from pathlib import Path
+          p = Path('build/validator/report.json')
+          report = json.loads(p.read_text(encoding='utf-8'))
+          counts = {s: sum(n.get('totalNotices', 0) for n in report.get('notices', []) if n.get('severity') == s)
+                    for s in ('ERROR', 'WARNING', 'INFO')}
+          print('MobilityData notice counts:', counts)
+          if counts['ERROR']:
+              raise SystemExit('GTFS validator reported ERROR notices')
+          PYVALIDATOR
       - name: Publish QA reports only (NOT the unlicensed source-derived GTFS ZIP)
         if: always()
         uses: actions/upload-artifact@v4

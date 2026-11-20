@@ -287,6 +287,13 @@ def build(source: dict[str, list[dict]], legal: list[dict], start: dt.date, days
         "frequencies.txt": csv_bytes(out_freq, ["trip_id", "start_time", "end_time", "headway_secs", "exact_times"]),
         "calendar.txt": csv_bytes(base_calendar),
         "calendar_dates.txt": csv_bytes(exceptions, ["service_id", "date", "exception_type"]),
+        "feed_info.txt": csv_bytes([{
+            "feed_publisher_name": "ColombiaTransit (unpublished research preview)",
+            "feed_publisher_url": "https://github.com/ColombiaTransit/Gtfs-ibaque",
+            "feed_lang": "es", "feed_start_date": start.strftime("%Y%m%d"),
+            "feed_end_date": (start + dt.timedelta(days=days - 1)).strftime("%Y%m%d"),
+            "feed_version": "research-preview-" + start.strftime("%Y%m%d"),
+        }]),
     }
     # A well-formed, nonempty calendar_dates header even when no exceptions fall in range.
     if not exceptions:

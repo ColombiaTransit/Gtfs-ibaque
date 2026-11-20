@@ -81,6 +81,7 @@ class TestGenerator(unittest.TestCase):
         self.assertEqual({r["headway_secs"] for r in peak}, {str(6 * 2 * 60)})
         self.assertEqual({r["start_time"] for r in peak}, {"06:00:00", "06:06:00"})
         self.assertEqual(report["covered_routes"], 1)
+        self.assertEqual(parse(tables["feed_info.txt"])[0]["feed_lang"], "es")
         self.assertFalse(report["publication_ready"])
         self.assertEqual(report["remaining_unnamed_stops"], 1)
         self.assertEqual(len(parse(tables["trips.txt"])), 6)

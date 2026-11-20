@@ -19,7 +19,7 @@ This first generator creates a **reproducible local GTFS preview** from the SHA-
 - Uses direction grouping by source `direction_id`; if absent, falls back to `trip_headsign`, explicitly a provisional assumption. Multiple patterns within a direction are interleaved with **equal provisional allocation**, so a single legal headway does not multiply across variants. Those groups are listed in the report for review.
 - Route 28 has the historical 16:00–18:00 peak exception; **18:00–19:30 on workdays and Saturdays is deliberately unmodeled** rather than being invented. The Sunday service remains full legal span.
 - Normalizes template stop times to offsets from the first source arrival; does not invent travel times. Removes `shape_dist_traveled` from `stop_times.txt` because the source shapes do not consistently provide matching distances; retains the source shapes unchanged.
-- Omits stale `feed_info` validity metadata. The generator produces `ibague_generator_report.json` containing all unresolved assumptions and excluded templates.
+- Replaces stale `feed_info` validity metadata with an explicit unpublished research-preview publisher, version and bounded feed dates. The generator produces `ibague_generator_report.json` containing all unresolved assumptions and excluded templates.
 
 ## Run locally
 
