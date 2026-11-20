@@ -1,0 +1,5 @@
+route,source_trip_id,source_nearest_terminal_side,source_nearest_terminal_stop_id,straight_line_terminal_to_candidate_m,graphhopper_distance_m,road_vs_straight_ratio,routing_status,anchor_osm_id,official_branch_stop_sequence_verified,actual_operational_branch_verified
+35,TRIP_R45,last,1035,6083.9,8754.7,1.44,GRAPHOPPER_BUS_CANDIDATE,node/4339120589,false,false
+35,TRIP_R46,first,402,3980.7,6127.6,1.54,GRAPHOPPER_BUS_CANDIDATE,node/4339120589,false,false
+48,TRIP_R53,last,1198,5156.8,6005.2,1.16,GRAPHOPPER_BUS_CANDIDATE,node/703223338,false,false
+48,TRIP_R54,first,1258,3572.2,4172.7,1.17,GRAPHOPPER_BUS_CANDIDATE,node/703223338,false,false

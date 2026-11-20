@@ -36,3 +36,18 @@ The University GTFS's `TRIP_R54` starts near **4.52578, -75.31056**, essentially
 - It uploads temporary research artifacts only: no source GTFS, candidate boarding stops, `shapes.txt` production changes, `trips.txt` or `frequencies.txt` edits.
 
 **Remaining route geometry decisions:** verify the precise Calle 100 route-8 diversion and source stop positions against the October poster. For Cay and Juntas, confirm the actual branch junction, roadway legality, official boarding points, and whether the new branch has a validated return path and stop sequence. Only then permit variant trips and rule-based one-in-three/headway scheduling in the generator.
+
+## First completed GraphHopper branch candidate run (20 November 2026)
+
+[Actions run 44711047487](https://github.com/ColombiaTransit/Gtfs-ibaque/actions/runs/44711047487): tests, SHA-pinned source extraction, route 8 direction audit, and **four of four** GraphHopper bus-profile candidate requests succeeded.
+
+| Branch | Old source pattern | Chosen source side | Straight-line source-to-OSM distance | GraphHopper bus-road candidate |
+| --- | --- | --- | ---: | ---: |
+| Cay (35) | `TRIP_R45` | end (`stop_id=1035`) | 6,084 m | 8,755 m |
+| Cay (35) | `TRIP_R46` | start (`stop_id=402`) | 3,981 m | 6,128 m |
+| Juntas (48) | `TRIP_R53` | end (`stop_id=1198`) | 5,157 m | 6,005 m |
+| Juntas (48) | `TRIP_R54` | start (`stop_id=1258`) | 3,572 m | 4,173 m |
+
+**Do not interpret these numbers as a confirmed branch length.** The old route 35 directions have substantially different nearest source termini. `TRIP_R45`'s nearest recorded stop to Cay is about 6.1 km away in a straight line, compared to 4.0 km for `TRIP_R46`. The branch needs accurate source anchoring, matching official turns and directional boarding stops. For route 48, `TRIP_R54` originates near Villa Restrepo, roughly 3.6 km straight-line from the village center of Juntas. The 05:00 and 05:40 Juntas departures still require an approved Juntas departure stop and the full ordered stop sequence.
+
+The zipped [QA artifact](https://github.com/ColombiaTransit/Gtfs-ibaque/actions/runs/44711047487) contains candidate GeoJSON and source-to-road QA. This repository carries a metadata-only [CSV summary](branch_graphhopper_results_2026_11_20.csv); derived geometry is kept only in the temporary Actions artifact pending source licensing.
