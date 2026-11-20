@@ -6,11 +6,11 @@ on:
       route_labels:
         description: 'October 2026 changed route labels (comma-separated) or all'
         required: false
-        default: '8,37,50'
+        default: 'all'
       max_patterns:
         description: 'Maximum GTFS route-direction patterns for this research run (1–30)'
         required: false
-        default: '8'
+        default: '30'
   push:
     paths:
       - scripts/route_changed_shapes_graphhopper.py
@@ -29,8 +29,8 @@ jobs:
       GRAPHHOPPER_PROFILE: ${{ vars.GRAPHHOPPER_PROFILE || 'bus' }}
       CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
       CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
-      ROUTE_LABELS: ${{ inputs.route_labels || '8,37,50' }}
-      MAX_PATTERNS: ${{ inputs.max_patterns || '8' }}
+      ROUTE_LABELS: ${{ inputs.route_labels || 'all' }}
+      MAX_PATTERNS: ${{ inputs.max_patterns || '30' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

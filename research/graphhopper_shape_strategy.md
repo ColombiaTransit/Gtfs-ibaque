@@ -15,7 +15,7 @@ This **does not replace any GTFS shapes** and does **not prove** that a route is
 
 ## Workflow
 
-In GitHub Actions select **Ibagué — OSM GraphHopper changed-route shape candidates**. Default pilot: `8,37,50` and 8 patterns. `route_labels=all`, `max_patterns=30` covers the full fourteen-route inventory when ready.
+In GitHub Actions select **Ibagué — OSM GraphHopper changed-route shape candidates**. The first pilot on 20 November 2026 covered `8,37,50` (8 patterns). The workflow now defaults to `route_labels=all`, `max_patterns=30` to generate review candidates for all fourteen changed routes; specify a smaller subset for targeted reruns.
 
 - Uses ColombiaTransit organization variable **`GRAPHHOPPER_URL`** and optional **`GRAPHHOPPER_PROFILE`** (`bus` by default), and optional Cloudflare Access secrets **`CF_ACCESS_CLIENT_ID`** / **`CF_ACCESS_CLIENT_SECRET`**. The script does not print the private base URL or credentials.
 - With no GraphHopper URL, still builds the stop sequence/waypoint manifest and emits a warning. It cannot pretend that road candidates were generated.
