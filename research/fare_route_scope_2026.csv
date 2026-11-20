@@ -1,32 +1,31 @@
-<PARSED TEXT FOR SHEET: 1 / 1 TABS
-TAB NAME: fare_route_scope_2026.csv>index,route,fare_scope,reason
-0,1,urban_assumed,Regular published urban route; verify operational exceptions before public release
-1,11,urban_assumed,Regular published urban route; verify operational exceptions before public release
-2,14,urban_assumed,Regular published urban route; verify operational exceptions before public release
-3,15,urban_assumed,Regular published urban route; verify operational exceptions before public release
-4,17,urban_assumed,Regular published urban route; verify operational exceptions before public release
-5,18,urban_assumed,Regular published urban route; verify operational exceptions before public release
-6,19,urban_assumed,Regular published urban route; verify operational exceptions before public release
-7,2,urban_assumed,Regular published urban route; verify operational exceptions before public release
-8,20,urban_assumed,Regular published urban route; verify operational exceptions before public release
-9,21,urban_assumed,Regular published urban route; verify operational exceptions before public release
-10,22,urban_assumed,Regular published urban route; verify operational exceptions before public release
-11,23,urban_assumed,Regular published urban route; verify operational exceptions before public release
-12,24,urban_assumed,Regular published urban route; verify operational exceptions before public release
-13,28,unverified,Additional Caiké departures and rural/suburban itinerary conditions unresolved
-14,29,unverified,Carmen de Bulira service; differential rural pricing not established
-15,31,urban_assumed,Regular published urban route; verify operational exceptions before public release
-16,33,urban_assumed,Regular published urban route; verify operational exceptions before public release
-17,35,unverified,Cay rural extension one in three departures; stop-level pricing unknown
-18,37,urban_assumed,Regular published urban route; verify operational exceptions before public release
-19,4/7,unverified,Official route 4 and 7 posters conflict with historical combined 4/7 GTFS
-20,40,urban_assumed,Regular published urban route; verify operational exceptions before public release
-21,43,urban_assumed,Regular published urban route; verify operational exceptions before public release
-22,48,unverified,Juntas rural extension one in three departures; differential fares not established
-23,50,urban_assumed,Regular published urban route; verify operational exceptions before public release
-24,53,urban_assumed,Regular published urban route; verify operational exceptions before public release
-25,6,urban_assumed,Regular published urban route; verify operational exceptions before public release
-26,8,urban_assumed,Regular published urban route; verify operational exceptions before public release
-27,82,urban_assumed,Regular published urban route; verify operational exceptions before public release
-28,9,urban_assumed,Regular published urban route; verify operational exceptions before public release
-29,90,urban_assumed,Regular published urban route; verify operational exceptions before public release
+route,fare_scope,reason
+1,urban_assumed,Regular published urban route; verify operational exceptions before public release
+11,urban_assumed,Regular published urban route; verify operational exceptions before public release
+14,urban_assumed,Regular published urban route; verify operational exceptions before public release
+15,urban_assumed,Regular published urban route; verify operational exceptions before public release
+17,urban_assumed,Regular published urban route; verify operational exceptions before public release
+18,urban_assumed,Regular published urban route; verify operational exceptions before public release
+19,urban_assumed,Regular published urban route; verify operational exceptions before public release
+2,urban_assumed,Regular published urban route; verify operational exceptions before public release
+20,urban_assumed,Regular published urban route; verify operational exceptions before public release
+21,urban_assumed,Regular published urban route; verify operational exceptions before public release
+22,urban_assumed,Regular published urban route; verify operational exceptions before public release
+23,urban_assumed,Regular published urban route; verify operational exceptions before public release
+24,urban_assumed,Regular published urban route; verify operational exceptions before public release
+28,unverified,Additional Caiké departures and rural/suburban itinerary conditions unresolved
+29,unverified,Carmen de Bulira service; differential rural pricing not established
+31,urban_assumed,Regular published urban route; verify operational exceptions before public release
+33,urban_assumed,Regular published urban route; verify operational exceptions before public release
+35,unverified,Cay rural extension one in three departures; stop-level pricing unknown
+37,urban_assumed,Regular published urban route; verify operational exceptions before public release
+4/7,unverified,Official route 4 and 7 posters conflict with historical combined 4/7 GTFS
+40,urban_assumed,Regular published urban route; verify operational exceptions before public release
+43,urban_assumed,Regular published urban route; verify operational exceptions before public release
+48,unverified,Juntas rural extension one in three departures; differential fares not established
+50,urban_assumed,Regular published urban route; verify operational exceptions before public release
+53,urban_assumed,Regular published urban route; verify operational exceptions before public release
+6,urban_assumed,Regular published urban route; verify operational exceptions before public release
+8,urban_assumed,Regular published urban route; verify operational exceptions before public release
+82,urban_assumed,Regular published urban route; verify operational exceptions before public release
+9,urban_assumed,Regular published urban route; verify operational exceptions before public release
+90,urban_assumed,Regular published urban route; verify operational exceptions before public release
