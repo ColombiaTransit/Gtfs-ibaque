@@ -124,3 +124,7 @@ The [20 November full GraphHopper road-candidate audit](research/graphhopper_ful
 ## October 2026 route 8 and rural branch investigation
 
 The [route 8 / Cay / Juntas research review](research/route8_cay_juntas_routing_review.md) combines the official October map's IDA/VUELTA direction with the pinned 2026 source stop pattern geography. `TRIP_R11` is directionally inconsistent in the original. Research-only GraphHopper bus-road candidates connect existing route 35 and route 48 source endpoints toward OSM Cay and Juntas reference locations. **No schedule, stop, production shape or headway changes are authorized by this research.**
+
+## Route 48 Juntas branch validation
+
+The [Juntas branch evidence and stop QA](research/route48_juntas_qa_2026_11_20.md) audits the incomplete 17/85-stop source patterns, previously generated rural GraphHopper candidates, and an optional narrow organization Overpass boarding-stop query. The [GitHub Action](.github/workflows/audit-route48-juntas.yml) **reuses research artifacts without rerouting all fourteen routes**. No generated GTFS, stop IDs, or branch frequencies are changed by this research.

@@ -1,0 +1,108 @@
+name: Audit Ibagué route 48 Juntas stops and corridor (research only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      full_geometry_run_id:
+        description: 'Existing 14-route GraphHopper candidate run ID (must have unexpired artifact)'
+        required: true
+        type: string
+        default: '44701165571'
+      rural_branch_run_id:
+        description: 'Existing Juntas branch GraphHopper run ID (must have unexpired artifact)'
+        required: true
+        type: string
+        default: '44711047487'
+  push:
+    paths:
+      - scripts/audit_route48_juntas.py
+      - tests/test_audit_route48_juntas.py
+      - .github/workflows/audit-route48-juntas.yml
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  route48-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install only geometry dependencies
+        run: python -m pip install --disable-pip-version-check 'shapely>=2.0,<3.0' 'pyproj>=3.5,<4.0'
+      - name: Offline route 48 QA regression tests
+        run: python -m unittest discover -s tests -p 'test_audit_route48_juntas.py' -v
+      - name: Reuse prior fourteen-route GH research artifact (NO rerouting)
+        uses: actions/download-artifact@v4
+        with:
+          name: ibague-osm-graphhopper-shapes-research-only
+          run-id: ${{ inputs.full_geometry_run_id || '44701165571' }}
+          github-token: ${{ github.token }}
+          path: build/route48-input/base
+      - name: Reuse prior Cay/Juntas GH research artifact (NO rerouting)
+        uses: actions/download-artifact@v4
+        with:
+          name: ibague-route8-cay-juntas-variant-road-qa
+          run-id: ${{ inputs.rural_branch_run_id || '44711047487' }}
+          github-token: ${{ github.token }}
+          path: build/route48-input/branches
+      - name: Audit existing route 48 candidate geometry and narrowly query OSM boarding candidates
+        env:
+          API_OVERPASS: ${{ vars.API_OVERPASS }}
+          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+        run: |
+          if [ -n "$API_OVERPASS" ]; then echo '::add-mask::'"$API_OVERPASS"; fi
+          python scripts/audit_route48_juntas.py \
+            --base build/route48-input/base/candidate_road_shapes_RESEARCH_ONLY.geojson \
+            --branch build/route48-input/branches/osm_branch_graphhopper_candidates_RESEARCH_ONLY.geojson \
+            --manifest build/route48-input/base/route_waypoint_review_manifest.json \
+            --try-overpass \
+            --out build/route48-juntas-qa
+      - name: Enforce no unsupported service or geometry promotion
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('build/route48-juntas-qa/summary.json').read_text())
+          assert d['all_road_order_checks_passed']
+          assert [x['original_stop_visits'] for x in d['source_patterns']]==[17,85]
+          assert all(x['branch_official_boarding_stop_confirmed']=='no' for x in d['source_patterns'])
+          assert not d['release_ready']
+          assert d['agency_verified_new_boarding_stops']==0
+          assert not any(d[k] for k in ('trips_txt_changed','stops_txt_changed',
+              'stop_times_txt_changed','shapes_txt_changed','frequencies_txt_changed'))
+          print('QA passed; branch positions and service remain unapproved')
+          PY
+      - name: Publish research summary without secret URLs
+        if: always()
+        run: |
+          if [ -f build/route48-juntas-qa/summary.json ]; then
+            python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          d=json.load(open('build/route48-juntas-qa/summary.json'))
+          print('## Route 48 — unapproved Villa Restrepo ↔ Juntas geometry')
+          print('| Source pattern | Old stops | Branch road, m | Join gap, m |')
+          print('|---|---:|---:|---:|')
+          for r in d['source_patterns']:
+              print(f"| {r['source_trip_id']} | {r['original_stop_visits']} | {r['candidate_extension_length_m']} | {r['join_point_error_m']} |")
+          print('Both branch candidates pass ordered Villa Restrepo / Iguaima / Juntas reference landmarks.')
+          print('Opposite-direction road alignment within 55m: ' + str(d['shared_opposite_direction_road_fraction_55m']))
+          print('OSM query status: ' + d['osm_query_status'])
+          print('OSM public-transport objects returned: ' + str(d['osm_stop_candidates_count']))
+          print('Within 75m of GraphHopper road: ' + str(d['osm_candidate_points_within_75m']))
+          print('**No candidate is an agency-verified route 48 stop. No GTFS files were modified.**')
+          PY
+          fi
+      - name: Archive QA only (do not redistribute original GTFS)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ibague-route48-juntas-geometry-and-osm-stops-qa
+          path: build/route48-juntas-qa/
+          if-no-files-found: warn
+          retention-days: 7

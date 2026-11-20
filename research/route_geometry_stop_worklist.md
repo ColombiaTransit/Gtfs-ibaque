@@ -22,7 +22,7 @@ This is the **single cross-route worklist** for the 14 itinerary changes effecti
 | High | 29 | **Calambeo / Carmen de Bulira** — Explain R39 5 stops versus R40 44; check whether terminal shift changes stop sequence without deleting Calambeo from official map | [Source](https://transmusical.gov.co/wp-content/uploads/2026/10/Ruta-29-scaled.png) | Open |
 | Medium | 37 | **Calle 15 / Calle 16 / Carrera Quinta / Carrera Primera** — Check Calle 15 return and remove obsolete Calle 16 visits from correct pattern only after map review | [Source](https://transmusical.gov.co/wp-content/uploads/2026/10/Ruta-37-scaled.png) | Open |
 | Medium | 40 | **Calle 17 / Calle 42 / Carrera Quinta / Versalles** — Audit two changed road sections and associated boarding stops; preserve unaffected corridor | [Source](https://transmusical.gov.co/wp-content/uploads/2026/10/Ruta-40-scaled.png) | Open |
-| High | 48 | **Villa Restrepo / Iguaima / Juntas; Avenida Guabinal** — Verify Juntas terminal and directional stops plus rural sequence, source R53 17 / R54 85 incompleteness, and Guabinal/Clínica Sharon city diversion; conditional one-in-three rule | [Source](https://transmusical.gov.co/wp-content/uploads/2026/10/Ruta-48-scaled.png) | Open |
+| High | 48 | **Villa Restrepo / Iguaima / Juntas; Avenida Guabinal** — Verify Juntas terminal and directional stops plus rural sequence, source R53 17 / R54 85 incompleteness, and Guabinal/Clínica Sharon city diversion; conditional one-in-three rule | [Source](https://transmusical.gov.co/wp-content/uploads/2026/10/Ruta-48-scaled.png) | In review |
 | Medium | 50 | **La Tobogán / Calle 42 / Avenida Guabinal** — Map affected return pattern and street-side stops; keep outward route unchanged | [Source](https://transmusical.gov.co/wp-content/uploads/2026/10/Ruta-50-scaled.png) | Open |
 | High | 35 | **El Libertador / vereda Cay** — Locate verified branch junction, Cay terminal and directional ordered stops; R45 37 and R46 34 do not prove dedicated Cay trips; one-in-three rule is not a stop list | [Source](https://transmusical.gov.co/wp-content/uploads/2026/06/Ruta-35-scaled.jpg) | Open |
 
@@ -64,3 +64,7 @@ This is the **single cross-route worklist** for the 14 itinerary changes effecti
 - **78 unnamed existing stops** and duplicate physical candidate `stop_code=287`: [general stop remediation plan](stop_remediation_plan.md) remains applicable.
 
 Machine-readable status: [route_geometry_stop_worklist.csv](route_geometry_stop_worklist.csv). Each case starts **Open**, not completed.
+
+## Route 48 research QA — underway
+
+The [dedicated Juntas road, stop and directional QA](route48_juntas_qa_2026_11_20.md) checks the 17-vs-85 source pattern gap and GraphHopper branch corridor. The follow-up workflow audits narrow OSM/Overpass stop candidates. **Status: in review, not route-validated; no GTFS data changed.**
