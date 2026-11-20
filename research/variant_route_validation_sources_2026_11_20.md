@@ -31,3 +31,7 @@ For each **actual** operating pattern/direction:
 7. Do not infer 2026 operational timetables from the secondary stop lists. Keep all provisional variants in the research register until the real branch service has been confirmed.
 
 **Bottom line:** Yes, route 8 has sufficient official mapping to validate direction and the Calle 100 detour, but not the operational status of its two short patterns; route 48 has a useful candidate **Juntas stop order** plus official dispatch policy, so its rural geometry can be checked after establishing real stopping points; route 35's Cay branch lacks a genuine, source-backed ordered stop sequence, despite the official one-in-three rule. Route 28's new park access is a standard-route geometry review, not yet proof of another timetable variant.
+
+## Route 28 Caiké boarding stops work item
+
+**OPEN:** Add/verify two direction-specific boarding positions at the park entrance and across the road for the return journey; validate physical coordinates, stop IDs, and stop order in `TRIP_R37` and `TRIP_R38` before inserting into GTFS. See [stop remediation plan](stop_remediation_plan.md#open-task--gtfs-route-28-add-caiké-entrance-boarding-stops-priority-high). No stops added yet.
