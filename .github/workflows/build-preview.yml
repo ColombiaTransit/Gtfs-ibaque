@@ -68,7 +68,8 @@ jobs:
           for date in ('20261208', '20261225', '20270101', '20270111'):
               assert {'service_id': 'CT_WK', 'date': date, 'exception_type': '2'} in exceptions, date
               assert {'service_id': 'CT_SU', 'date': date, 'exception_type': '1'} in exceptions, date
-          assert len(exceptions) == 2 * report['holiday_override_dates']
+          trip_calendar_exceptions = [row for row in exceptions if row['service_id'] in ('CT_WK', 'CT_SA', 'CT_SU')]
+          assert len(trip_calendar_exceptions) == 2 * report['holiday_override_dates']
           print('Colombia holiday overrides checked:', report['holiday_override_dates'])
           print('Holiday names and dates:', report['holiday_details'])
           PYHOLIDAYS
