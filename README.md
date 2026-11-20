@@ -106,3 +106,7 @@ The first reproducible local GTFS preview generator is in [`scripts/build_gtfs.p
 [`research/official_fares_2026.csv`](research/official_fares_2026.csv):
 **COP 3,300 Mon–Sat** and **COP 3,400 Sunday/Colombian holidays**.
 The fare-only services expire on **31 December 2026**, even if the GTFS preview continues into 2027. Rural/mixed services have an explicit conservative unpriced network and cannot accidentally inherit the urban fare. See [fare modeling and excluded routes](research/generator_v1.md).
+
+## October 2026 modified route geometry audit
+
+All **14** changed routes (30 source trip patterns) are indexed with their October 2026 [official new-route maps and specific street changes](research/route_changes_2026_10_19.md) and [machine-readable status register](research/route_changes_2026_10_19.csv). The November supplementary GTFS is not necessarily current for these geometry changes. All shape replacements are **pending** and none have been applied to the preview generator.

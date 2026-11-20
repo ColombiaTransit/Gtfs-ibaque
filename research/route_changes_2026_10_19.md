@@ -2,7 +2,7 @@
 
 **Status (20 November 2026): primary source and map inventory complete; no route shape is verified or replaced.**
 
-Sources: the [municipal announcement]( https://www.ibague.gov.co/portal/noticias/23334-este-lunes-cambiaran-los-recorridos-de-14-rutas-de-busetas-en-ibague-conozca-sus ) (18 October 2026), the [official SETP route-posters](https://transmusical.gov.co/rutas/) (October 2026 image paths), pinned May 2026 Universidad de Ibagué GTFS, and an independently supplied supplementary Moovit-derived GTFS with service calendar starting 13 November 2026.
+Sources: the [municipal announcement](https://www.ibague.gov.co/portal/noticias/23334-este-lunes-cambiaran-los-recorridos-de-14-rutas-de-busetas-en-ibague-conozca-sus) (18 October 2026), the [official SETP route-posters](https://transmusical.gov.co/rutas/) (October 2026 image paths), pinned May 2026 Universidad de Ibagué GTFS, and an independently supplied supplementary Moovit-derived GTFS with service calendar starting 13 November 2026.
 
 ## Inventory
 
