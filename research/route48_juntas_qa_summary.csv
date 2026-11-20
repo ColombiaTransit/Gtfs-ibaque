@@ -1,0 +1,3 @@
+route,pattern_id,source_direction_id,source_stop_visits,source_road_m,branch_road_m,branch_join_gap_m,landmarks_in_expected_order,physical_osm_stops_found,official_juntas_stop_verified,updated_city_itinerary_verified,status
+48,TRIP_R53,0,17,13359.6,5982.0,4.9,yes,0,no,no,in_review
+48,TRIP_R54,1,85,26404.5,4156.0,0.1,yes,0,no,no,in_review
