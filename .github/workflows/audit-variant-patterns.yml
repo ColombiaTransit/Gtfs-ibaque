@@ -1,0 +1,70 @@
+name: Audit Ibagué ambiguous trip patterns (research only)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - scripts/audit_variant_patterns.py
+      - tests/test_audit_variant_patterns.py
+      - .github/workflows/audit-variant-patterns.yml
+      - research/variant_rules_2026.csv
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-pinned-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test source-overlap algorithm without downloading GTFS
+        run: python -m unittest discover -s tests -p 'test_audit_variant_patterns.py' -v
+      - name: Audit 8, 28, 35, 48, 4/7, and 29 from SHA-verified upstream GTFS
+        run: python scripts/audit_variant_patterns.py --download --output build/ibague-variant-audit/source_variant_report.json
+      - name: Enforce reproducible known source facts (no speculative decisions)
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('build/ibague-variant-audit/source_variant_report.json').read_text(encoding='utf-8'))
+          r=d['route_analysis']
+          assert r['8']['source_patterns']==4
+          assert {tuple(sorted(f['pattern_ids'])) for f in r['8']['candidate_stop_families']}=={
+             ('TRIP_R10','TRIP_R12'),('TRIP_R11','TRIP_R9')}
+          assert r['8']['original_direction_metadata_conflicts']==1
+          assert sorted(f['shared_stop_ids'] for f in r['8']['candidate_stop_families'])==[49,61]
+          for route in ('28','35','48','4/7','29'):
+              assert r[route]['source_patterns']==2, route
+          assert [p['stop_count'] for p in r['48']['patterns']]==[17,85]
+          assert not d['route_8_three_way_split_confirmed']
+          assert all(not row['source_variants_verified'] for row in r.values())
+          print('All expected source pattern relations reproduced; no operational variant certified')
+          PY
+      - name: Include research status in Actions summary
+        if: always()
+        run: |
+          if [ -f build/ibague-variant-audit/source_variant_report.json ]; then
+            python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          d=json.loads(Path('build/ibague-variant-audit/source_variant_report.json').read_text())
+          print('## Source-pattern variant QA (not published GTFS)')
+          print('| Route | Source patterns | Review flag |')
+          print('|---|---:|---|')
+          for rt,x in d['route_analysis'].items():
+              print(f'| {rt} | {x["source_patterns"]} | {x["risk"]} |')
+          print('No shape, stop, schedule or frequency corrections were applied.')
+          PY
+          fi
+      - name: Upload QA only, not source ZIP
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ibague-variant-source-audit-qa
+          path: build/ibague-variant-audit/source_variant_report.json
+          if-no-files-found: warn
+          retention-days: 7
